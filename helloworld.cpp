@@ -64,9 +64,8 @@ int main(int argc, char** argv) {
 
     // odometry measurement noise model (covariance matrix)
     noiseModel::Diagonal::shared_ptr odomModel = noiseModel::Diagonal::Sigmas(Vector3(0.5, 0.5, 0.1));
-
-    // Add odometry factors
-    // Create odometry (Between) factors between consecutive poses
+set(CMAKE_CXX_COMPILER g++)
+etween) factors between consecutive poses
     // robot makes 90 deg right turns at x3 - x5
     graph.add(BetweenFactor<Pose2>(Symbol('x', 1), Symbol('x', 2), Pose2(5, 0, 0), odomModel));
     graph.add(BetweenFactor<Pose2>(Symbol('x', 2), Symbol('x', 3), Pose2(5, 0, -M_PI_2), odomModel));
