@@ -14,8 +14,10 @@ public:
     cv::Mat p_l_img;
     cv::Mat p_r_img;
 
+    cv::Ptr<cv::CLAHE> clahe;
+
     void load_image(std::string &img_dir, int &img_number);
-    void apply_clahe();
+    void apply_clahe(double clip_limit);
     int show_image(int wait);
     int show_image(cv::Mat &imgL, cv::Mat &imgR, int wait);
 

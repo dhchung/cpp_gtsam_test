@@ -1,6 +1,6 @@
 #include "image_processing.h"
 ImageProcessing::ImageProcessing(){
-
+    clahe = cv::createCLAHE();
 }
 ImageProcessing::~ImageProcessing(){
 
@@ -31,12 +31,32 @@ int ImageProcessing::show_image(int wait){
 
 }
 
-void ImageProcessing::apply_clahe(){
+int ImageProcessing::show_image(cv::Mat &imgL, cv::Mat &imgR, int wait){
+    if(imgL.empty()){
+        return 0;
+    }
+    if(imgR.empty()){
+        return 0;
+    }
+    cv::hconcat(imgL, imgR, c_img);
+    if(!cv::getWindowProperty("Stereo images", cv::WND_PROP_VISIBLE)) {
+        cv::namedWindow("Stereo images", cv::WINDOW_AUTOSIZE);
+    }
+
+    cv::imshow("Stereo images", c_img);
+    cv::waitKey(wait);
+
+}
+
+
+void ImageProcessing::apply_clahe(double clip_limit){
+    clahe->setClipLimit(clip_limit);
     cv::Mat g_l_img;
     cv::Mat g_r_img;
 
     cv::cvtColor(l_img, g_l_img, CV_RGB2GRAY);
+    cv::cvtColor(r_img, g_r_img, CV_RGB2GRAY);
 
-    cv::CLAHE::apply(l_img, p_l_img);
-    cv::CLAHE::apply(r_img, p_r_img);
+    clahe->apply(g_l_img, p_l_img);
+    clahe->apply(g_r_img, p_r_img);
 }
