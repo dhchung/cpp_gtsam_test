@@ -1,6 +1,7 @@
 #include "image_processing.h"
 ImageProcessing::ImageProcessing(){
     clahe = cv::createCLAHE();
+    
 }
 ImageProcessing::~ImageProcessing(){
 
@@ -53,10 +54,14 @@ void ImageProcessing::apply_clahe(double clip_limit){
     clahe->setClipLimit(clip_limit);
     cv::Mat g_l_img;
     cv::Mat g_r_img;
-
-    cv::cvtColor(l_img, g_l_img, CV_RGB2GRAY);
-    cv::cvtColor(r_img, g_r_img, CV_RGB2GRAY);
+    
+    cv::cvtColor(l_img, g_l_img, cv::COLOR_RGB2GRAY);
+    cv::cvtColor(r_img, g_r_img, cv::COLOR_RGB2GRAY);
 
     clahe->apply(g_l_img, p_l_img);
     clahe->apply(g_r_img, p_r_img);
+    
+    surf.detect_keypoints(p_l_img, p_r_img);
+    surf.show_matches(l_img, surf.l_keypt);
+
 }

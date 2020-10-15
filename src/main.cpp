@@ -1,6 +1,4 @@
 #include <iostream>
-// #include <opencv2/core/core.hpp>
-// #include <opencv2/highgui/highgui.hpp>
 #include "image_processing.h"
 
 using namespace std;
@@ -18,7 +16,8 @@ int main(int argc, char** argv){
 
         img_proc.load_image(image_dir, i);
         img_proc.apply_clahe(4.0);
-        img_proc.show_image(img_proc.p_l_img, img_proc.p_r_img,10);
+        img_proc.show_image(img_proc.p_l_img, img_proc.p_r_img,1);
+        // img_proc.show_image(10);
 
     }
     return 0;
