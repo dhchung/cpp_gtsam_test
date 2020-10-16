@@ -5,6 +5,7 @@
 #include <opencv2/xfeatures2d/nonfree.hpp>
 #include <iostream>
 #include <Eigen/Dense>
+#include <algorithm>
 
 struct SURFDetector
 {
@@ -51,11 +52,28 @@ struct SURFDetector
         for(int l_pt_idx = 0; l_pt_idx<l_feat_num; ++l_pt_idx){
             double base_y = l_keypt[l_pt_idx].pt.y;
             double base_x = l_keypt[l_pt_idx].pt.x;
+            double base_s = pow(l_keypt[l_pt_idx].octave,2)*l_keypt[l_pt_idx].size;
+
 
             Eigen::VectorXd x_distance = r_feat_loc.row(1).array() - base_x;
             Eigen::VectorXd y_distance = r_feat_loc.row(2).array() - base_y;
 
-            
+            std::vector<int> logic_x_y_s;
+
+            for(int i=0; i<r_feat_num; ++i){
+                if(x_distance(i)>0)
+                    continue;
+                if(-x_distance(i) < min_x_px_diff || -x_distance(i) > max_x_px_diff)
+                    continue;
+                if(abs(y_distance(i))>max_y_px_diff)
+                    continue;
+                
+                if()
+
+
+                logic_x_y_s.push_back(i);
+            }
+
 
         }
     }
