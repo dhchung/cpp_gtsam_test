@@ -4,7 +4,7 @@
 #include <opencv2/features2d.hpp>
 #include <opencv2/xfeatures2d/nonfree.hpp>
 #include <iostream>
-
+#include <Eigen/Dense>
 
 struct SURFDetector
 {
@@ -23,11 +23,10 @@ struct SURFDetector
         extractor = cv::xfeatures2d::SurfDescriptorExtractor::create();
     }
 
-    void detect_keypoints(cv::Mat & imgl, cv::Mat & imgr) {
+    void detectAndCompute_keypoints(cv::Mat & imgl, cv::Mat & imgr) {
         surf->detectAndCompute(imgl, cv::noArray(), l_keypt, l_des);
-        surf->detectAndCompute(imgr, cv::noArray(), l_keypt, l_des);
+        surf->detectAndCompute(imgr, cv::noArray(), r_keypt, r_des);
     }
-
 
     void show_matches(cv::Mat & src, std::vector<cv::KeyPoint> & keypt){
         cv::Mat img_keypoints;
@@ -35,6 +34,31 @@ struct SURFDetector
         cv::imshow("SURF Keypoints", img_keypoints);
     }
 
+    void match_stereo(double min_x_px_diff, double max_x_px_diff, double max_y_px_diff){
+        int l_feat_num = l_keypt.size();
+        int r_feat_num = r_keypt.size();
+
+        Eigen::Matrix2Xd l_feat_loc(2,l_feat_num);
+        Eigen::Matrix2Xd r_feat_loc(2,r_feat_num);
+
+        for(int i=0; i<l_feat_num; ++i){
+            l_feat_loc.col(i)<<l_keypt[i].pt.x, l_keypt[i].pt.y;
+        }
+        for(int i=0; i<r_feat_num; ++i){
+            r_feat_loc.col(i)<<r_keypt[i].pt.x, r_keypt[i].pt.y;
+        }
+
+        for(int l_pt_idx = 0; l_pt_idx<l_feat_num; ++l_pt_idx){
+            double base_y = l_keypt[l_pt_idx].pt.y;
+            double base_x = l_keypt[l_pt_idx].pt.x;
+
+            Eigen::VectorXd x_distance = r_feat_loc.row(1).array() - base_x;
+            Eigen::VectorXd y_distance = r_feat_loc.row(2).array() - base_y;
+
+            
+
+        }
+    }
 };
 
 class ImageProcessing{

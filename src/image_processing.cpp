@@ -61,7 +61,8 @@ void ImageProcessing::apply_clahe(double clip_limit){
     clahe->apply(g_l_img, p_l_img);
     clahe->apply(g_r_img, p_r_img);
     
-    surf.detect_keypoints(p_l_img, p_r_img);
+    surf.detectAndCompute_keypoints(p_l_img, p_r_img);
     surf.show_matches(l_img, surf.l_keypt);
-
+    surf.match_stereo(0,0,0);
 }
+
