@@ -98,6 +98,8 @@ struct SURFDetector
                                 }
                             }
                             r2l_candid[i].erase(r2l_candid[i].begin()+j);
+                        } else{
+                            is_min = false;
                         }
                     }
                     if(!is_min)
@@ -109,8 +111,19 @@ struct SURFDetector
                     for(int j=0; j<l2r_candid[l_pt_idx].size(); ++j){
                         if(l2r_candid[l_pt_idx][j].dist>distance) {
                             is_min = true;
-
+                            for(int k=0; k<r2l_candid[l2r_candid[l_pt_idx][j].idx].size();++k) {
+                                if(r2l_candid[l2r_candid[l_pt_idx][j].idx][k].idx==l_pt_idx){
+                                    r2l_candid[l2r_candid[l_pt_idx][j].idx].erase(r2l_candid[l2r_candid[l_pt_idx][j].idx].begin()+k);
+                                }
+                            }
+                            l2r_candid[l_pt_idx].erase(l2r_candid[l_pt_idx].begin()+j);
+                            
+                        } else{
+                            is_min = false;
                         }
+                    }
+                    if(!is_min){
+                        continue;
                     }
                 }
 
@@ -128,6 +141,12 @@ class ImageProcessing{
 public:
     ImageProcessing();
     ~ImageProcessing();
+    float base_line;
+    float img_center_x;
+    float img_center_y;
+    float focal_length;
+
+
     cv::Mat l_img;
     cv::Mat r_img;
     cv::Mat c_img;

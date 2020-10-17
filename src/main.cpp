@@ -6,8 +6,6 @@ using namespace std;
 int main(int argc, char** argv){
 
     ImageProcessing img_proc;
-
-
     string image_dir = "/media/dongha/BLACK_PANTH/Dataset/170316_data/RectifiedImgs_Color";
     
     for(int i = 1; i<1389; ++i) {

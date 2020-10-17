@@ -1,6 +1,10 @@
 #include "image_processing.h"
 ImageProcessing::ImageProcessing(){
     clahe = cv::createCLAHE();
+    base_line = 120.0;
+    img_center_x = 236.0;
+    img_center_y = 172.0;
+    focal_length = 526.0;
     
 }
 ImageProcessing::~ImageProcessing(){
