@@ -9,6 +9,14 @@
 
 struct SURFDetector
 {
+    struct Matching_idx{
+        int idx;
+        double dist;
+        Matching_idx(int index, double distance){
+            idx = index;
+            dist = distance;
+        }
+    };
     cv::Ptr<cv::Feature2D> surf;
     cv::Ptr<cv::Feature2D> extractor;
 
@@ -49,16 +57,23 @@ struct SURFDetector
             r_feat_loc.col(i)<<r_keypt[i].pt.x, r_keypt[i].pt.y;
         }
 
+        std::vector<std::vector<Matching_idx>> l2r_candid;
+        std::vector<std::vector<Matching_idx>> r2l_candid;
+
+        l2r_candid.resize(l_feat_num);
+        r2l_candid.resize(r_feat_num);
+
         for(int l_pt_idx = 0; l_pt_idx<l_feat_num; ++l_pt_idx){
             double base_y = l_keypt[l_pt_idx].pt.y;
             double base_x = l_keypt[l_pt_idx].pt.x;
-            double base_s = pow(l_keypt[l_pt_idx].octave,2)*l_keypt[l_pt_idx].size;
+            double base_s = l_keypt[l_pt_idx].size;
 
 
             Eigen::VectorXd x_distance = r_feat_loc.row(1).array() - base_x;
             Eigen::VectorXd y_distance = r_feat_loc.row(2).array() - base_y;
 
             std::vector<int> logic_x_y_s;
+            
 
             for(int i=0; i<r_feat_num; ++i){
                 if(x_distance(i)>0)
@@ -67,11 +82,41 @@ struct SURFDetector
                     continue;
                 if(abs(y_distance(i))>max_y_px_diff)
                     continue;
-                
-                if()
+                if(abs(r_keypt[i].size-base_s)>10)
+                    continue;
+                double distance = cv::norm(l_des.row(l_pt_idx), r_des.row(i));
+                if(distance>0.5)
+                    continue;
+                if(!r2l_candid[i].empty()){
+                    bool is_min = false;
+                    for(int j=0; j<r2l_candid[i].size(); ++j){
+                        if(r2l_candid[i][j].dist>distance) {
+                            is_min = true;
+                            for(int k=0; k<l2r_candid[r2l_candid[i][j].idx].size();++k){
+                                if(l2r_candid[r2l_candid[i][j].idx][k].idx==i){
+                                    l2r_candid[r2l_candid[i][j].idx].erase(l2r_candid[r2l_candid[i][j].idx].begin()+k);
+                                }
+                            }
+                            r2l_candid[i].erase(r2l_candid[i].begin()+j);
+                        }
+                    }
+                    if(!is_min)
+                        continue;
+                }
 
+                if(!l2r_candid[l_pt_idx].empty()){
+                    bool is_min = false;
+                    for(int j=0; j<l2r_candid[l_pt_idx].size(); ++j){
+                        if(l2r_candid[l_pt_idx][j].dist>distance) {
+                            is_min = true;
 
+                        }
+                    }
+                }
+
+                l2r_candid[l_pt_idx].push_back(Matching_idx(i, distance));
                 logic_x_y_s.push_back(i);
+                std::cout<<i<<std::endl;
             }
 
 
