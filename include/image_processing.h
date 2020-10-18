@@ -37,11 +37,6 @@ struct SURFDetector
         surf->detectAndCompute(imgr, cv::noArray(), r_keypt, r_des);
     }
 
-    void show_matches(cv::Mat & src, std::vector<cv::KeyPoint> & keypt){
-        cv::Mat img_keypoints;
-        cv::drawKeypoints(src, keypt, img_keypoints);
-        cv::imshow("SURF Keypoints", img_keypoints);
-    }
 
     void match_stereo(double min_x_px_diff, double max_x_px_diff, double max_y_px_diff){
         int l_feat_num = l_keypt.size();
@@ -69,8 +64,8 @@ struct SURFDetector
             double base_s = l_keypt[l_pt_idx].size;
 
 
-            Eigen::VectorXd x_distance = r_feat_loc.row(1).array() - base_x;
-            Eigen::VectorXd y_distance = r_feat_loc.row(2).array() - base_y;
+            Eigen::VectorXd x_distance = r_feat_loc.row(0).array() - base_x;
+            Eigen::VectorXd y_distance = r_feat_loc.row(1).array() - base_y;
 
             std::vector<int> logic_x_y_s;
             
@@ -129,10 +124,8 @@ struct SURFDetector
 
                 l2r_candid[l_pt_idx].push_back(Matching_idx(i, distance));
                 logic_x_y_s.push_back(i);
-                std::cout<<i<<std::endl;
+                // std::cout<<i<<std::endl;
             }
-
-
         }
     }
 };
@@ -162,4 +155,6 @@ public:
     void apply_clahe(double clip_limit);
     int show_image(int wait);
     int show_image(cv::Mat &imgL, cv::Mat &imgR, int wait);
+
+    // void match_stereo(double distance, )
 };

@@ -5,7 +5,7 @@ ImageProcessing::ImageProcessing(){
     img_center_x = 236.0;
     img_center_y = 172.0;
     focal_length = 526.0;
-    
+
 }
 ImageProcessing::~ImageProcessing(){
 
@@ -66,7 +66,8 @@ void ImageProcessing::apply_clahe(double clip_limit){
     clahe->apply(g_r_img, p_r_img);
     
     surf.detectAndCompute_keypoints(p_l_img, p_r_img);
-    surf.show_matches(l_img, surf.l_keypt);
     surf.match_stereo(20,50,10);
 }
+
+
 
