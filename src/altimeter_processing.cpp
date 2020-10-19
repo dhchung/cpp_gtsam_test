@@ -12,7 +12,7 @@ void AltimeterProcessing::load_altimeter(std::string & filedir, int & data_num){
     std::ifstream infile(filedir+"/altimeter_log_file.txt");
     depth.clear();
 
-    std::vector<double> read_depth(data_num, -500.0);
+    std::vector<float> read_depth(data_num, -500.0);
     
 
     while(infile){
@@ -35,12 +35,12 @@ void AltimeterProcessing::load_altimeter(std::string & filedir, int & data_num){
         if(read_depth[data_idx-1]>0)
             continue;
 
-        double cur_depth = std::stod(record[1]);
+        float cur_depth = std::stod(record[1]);
         if(cur_depth>0 && cur_depth<0.2){
             cur_depth = 0.5;
         }
 
-        read_depth[data_idx-1] = cur_depth;
+        read_depth[data_idx-1] = cur_depth*1000.0; //[mm]
     }
 
     for(int i=0; i<data_num; ++i) {
@@ -51,6 +51,4 @@ void AltimeterProcessing::load_altimeter(std::string & filedir, int & data_num){
 
 
     depth = read_depth;
-
-    std::cout<<depth.size()<<std::endl;
 }
