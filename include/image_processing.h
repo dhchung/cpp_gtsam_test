@@ -104,7 +104,7 @@ struct SURFDetector
                 if(abs(y_distance(i))>max_y_px_diff)
                     continue;
 
-                if(abs(r_keypt[i].size-base_s)>10)
+                if(abs(r_keypt[i].size-base_s)>5)
                     continue;
 
                 float distance = cv::norm(l_des.row(l_pt_idx), r_des.row(i));
@@ -132,7 +132,8 @@ struct SURFDetector
                 if(!l2r_candid_mem[l_pt_idx].empty()){
                     bool is_min = false;
                     for(int j=0; j<l2r_candid_mem[l_pt_idx].size(); ++j){
-                        if(l2r_candid_mem[l_pt_idx][j].dist>distance) {
+                        float cur_dist = l2r_candid_mem[l_pt_idx][j].dist;
+                        if(cur_dist>distance) {
                             is_min = true;
                             for(int k=0; k<r2l_candid_mem[l2r_candid_mem[l_pt_idx][j].idx].size();++k) {
                                 if(r2l_candid_mem[l2r_candid_mem[l_pt_idx][j].idx][k].idx==l_pt_idx){
@@ -140,6 +141,9 @@ struct SURFDetector
                                 }
                             }
                             l2r_candid_mem[l_pt_idx].erase(l2r_candid_mem[l_pt_idx].begin()+j);
+                            if(cur_dist/distance<0.8) {
+                                is_min = false;
+                            }
                             
                         } else{
                             is_min = false;

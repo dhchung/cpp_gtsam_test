@@ -77,7 +77,7 @@ void ImageProcessing::match_stereo(float & depth, float & depth_err) {
     float min_pixel_diff = base_line*focal_length/long_depth;
 
     surf.detectAndCompute_keypoints(p_l_img, p_r_img);
-    surf.match_stereo(min_pixel_diff, max_pixel_diff, 10);
+    surf.match_stereo(min_pixel_diff, max_pixel_diff, 5);
 
     
 

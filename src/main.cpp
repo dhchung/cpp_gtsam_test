@@ -2,15 +2,33 @@
 #include "image_processing.h"
 #include "altimeter_processing.h"
 #include "pointcloud_processing.h"
+#include "ransac_plane.h"
+#include <thread>
 
+
+using std::thread;
 using namespace std;
+
+ImageProcessing img_proc;
+AltimeterProcessing alt_proc;
+
+PointCloudProcessing pt_cld_processing;
+
+RANSACPlane ransac_plane;
+
+
+void f1(string & img_dir, int & img_no, float & cur_depth, float &depth_err){
+    img_proc.load_image(img_dir, img_no);
+    img_proc.apply_clahe(4.0);
+    img_proc.show_image(img_proc.p_l_img, img_proc.p_r_img,1);
+    img_proc.match_stereo(cur_depth, depth_err);
+    img_proc.get_3d_points();
+}
 
 int main(int argc, char** argv){
 
-    ImageProcessing img_proc;
-    AltimeterProcessing alt_proc;
 
-    PointCloudProcessing pt_cld_processing;
+
 
     string image_dir = "/media/dongha/BLACK_PANTH/Dataset/170316_data/RectifiedImgs_Color";
 
@@ -29,8 +47,9 @@ int main(int argc, char** argv){
         img_proc.show_image(img_proc.p_l_img, img_proc.p_r_img,1);
         img_proc.match_stereo(cur_depth, depth_err);
         img_proc.get_3d_points();
-        // img_proc.show_image(10);
-
+        // thread t1(f1, image_dir, i, cur_depth, depth_err);
+        // f1(image_dir, i, cur_depth, depth_err);
+        // t1.join();
 
         std::vector<std::vector<float>> point_3d;
         point_3d.resize(img_proc.surf.point_3d.size());
@@ -40,8 +59,20 @@ int main(int argc, char** argv){
                                      img_proc.surf.point_3d[i].loc_3d_z};
             point_3d[i] = point;
         }
+
+
+        std::vector<std::vector<float>> ransac_point_3d;
+
+
+        ransac_plane.perform_ransac_plane(point_3d, &ransac_point_3d);
+
+
+
         pt_cld_processing.show_pointcloud(point_3d);
+
+        std::cout<<"Show Pointcloud is over"<<std::endl;
         
     }
     return 0;
 }
+
