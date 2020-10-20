@@ -32,8 +32,11 @@ include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
+add_subdirectory(glad/)
+
 target_link_libraries (${PROJECT_NAME} 
                        gtsam
                        Eigen3::Eigen
                        ${OpenCV_LIBS}
-                       ${PCL_LIBRARIES})
+                       ${PCL_LIBRARIES}
+                       glad ${CMAKE_DL_LIBS})

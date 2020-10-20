@@ -106,9 +106,9 @@ struct SURFDetector
 
                 if(abs(r_keypt[i].size-base_s)>10)
                     continue;
-                    
+
                 float distance = cv::norm(l_des.row(l_pt_idx), r_des.row(i));
-                if(distance>0.5)
+                if(distance>0.4)
                     continue;
                 if(!r2l_candid_mem[i].empty()){
                     bool is_min = false;

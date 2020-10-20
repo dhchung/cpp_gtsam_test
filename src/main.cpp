@@ -18,7 +18,7 @@ int main(int argc, char** argv){
     alt_proc.load_altimeter(image_dir, data_num);
     float depth_err = 300;
     
-    for(int i = 1; i<data_num+1; ++i) {
+    for(int i = 120; i<data_num+1; ++i) {
 
         float cur_depth = alt_proc.depth[i-1];
         std::cout<<"depth: "<<cur_depth<<std::endl;

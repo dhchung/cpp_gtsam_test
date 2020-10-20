@@ -30,14 +30,9 @@ void PointCloudProcessing::show_pointcloud(std::vector<std::vector<float>> & pt_
 
 
     viewer.showCloud(cloud2);
-    // while (!viewer.wasStopped ())
-    // {
-    // }    
+    while (!viewer.wasStopped ())
+    {
+    }    
     
     
 }
-
-
-
-// pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloudPTR(new pcl::PointCloud<pcl::PointXYZRGB>);
-// *cloudPTR = createPointCloud(nodeList);
