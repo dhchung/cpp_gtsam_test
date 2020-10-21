@@ -42,16 +42,14 @@ int main(int argc, char** argv){
         img_proc.apply_clahe(4.0);
         img_proc.show_image(img_proc.p_l_img, img_proc.p_r_img,1);
         img_proc.match_stereo(cur_depth, depth_err, &pt_cld);
-        // thread t1(f1, image_dir, i, cur_depth, depth_err);
-        // f1(image_dir, i, cur_depth, depth_err);
-        // t1.join();
 
-        PointCloud ransac_point_3d;
-        ransac_plane.perform_ransac_plane(pt_cld, &ransac_point_3d);
 
-        pt_cld_processing.show_pointcloud(pt_cld);
+        // PointCloud ransac_point_3d;
+        // ransac_plane.perform_ransac_plane(pt_cld, &ransac_point_3d);
 
-        pt_cld_processing.show_pointcloud(ransac_point_3d);
+        // pt_cld_processing.show_pointcloud(pt_cld);
+
+        // pt_cld_processing.show_pointcloud(ransac_point_3d);
 
         
     }

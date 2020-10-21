@@ -7,7 +7,7 @@ public:
     PointCloud();
     ~PointCloud();
     Eigen::Matrix3Xf point_cloud;
-    Eigen::Matrix3Xf point_color;
+    Eigen::Matrix3Xi point_color;
     Eigen::MatrixXf point_des;
     Eigen::VectorXf point_size;
 };

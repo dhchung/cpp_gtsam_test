@@ -223,7 +223,45 @@ void ImageProcessing::get_3d_points(std::vector<cv::KeyPoint> &l_keypt,
         pt_cld->point_des.col(i) = des.transpose();
     }
 
-    // std::cout<<pt_cld->point_cloud<<std::endl;
+    show_matches(l_keypt, r_keypt, matched_pairs);
 
 }
 
+void ImageProcessing::show_matches(std::vector<cv::KeyPoint> &l_keypt,
+                                   std::vector<cv::KeyPoint> &r_keypt,
+                                   std::vector<std::vector<int>> &matched_pairs){
+    cv::Mat l_img_copy = l_img.clone();
+    cv::Mat r_img_copy = r_img.clone();
+
+
+    for(auto & pt:l_keypt) {
+        circle(l_img_copy,
+                pt.pt,
+                2,
+                cv::Scalar(255,0,0),
+                cv::FILLED,
+                cv::LINE_8);
+    }
+    for(auto & pt:r_keypt) {
+        circle(r_img_copy,
+                pt.pt,
+                2,
+                cv::Scalar(0,0,255),
+                cv::FILLED,
+                cv::LINE_8);
+    }
+
+    cv::Mat combined_img;
+    cv::hconcat(l_img_copy, r_img_copy, combined_img);
+
+    cv::Point2f Img_width_pt(l_img.cols, 0);
+
+    for(auto & pairs:matched_pairs){
+        line(combined_img,
+                l_keypt[pairs[0]].pt,
+                r_keypt[pairs[1]].pt+Img_width_pt,
+                cv::Scalar(255,255,255));
+    }
+    cv::imshow("Test", combined_img);
+    cv::waitKey(1);
+}

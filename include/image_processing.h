@@ -44,42 +44,6 @@ struct SURFDetector
         surf->detectAndCompute(imgl, cv::noArray(), *l_keypt, *l_des);
         surf->detectAndCompute(imgr, cv::noArray(), *r_keypt, *r_des);
     }
-
-    // void show_matches(cv::Mat &ImgL, cv::Mat &ImgR){
-    //     cv::Mat l_img_copy = ImgL.clone();
-    //     cv::Mat r_img_copy = ImgR.clone();
-
-
-    //     for(auto & pt:l_keypt) {
-    //         circle(l_img_copy,
-    //                pt.pt,
-    //                2,
-    //                cv::Scalar(255,0,0),
-    //                cv::FILLED,
-    //                cv::LINE_8);
-    //     }
-    //     for(auto & pt:r_keypt) {
-    //         circle(r_img_copy,
-    //                pt.pt,
-    //                2,
-    //                cv::Scalar(0,0,255),
-    //                cv::FILLED,
-    //                cv::LINE_8);
-    //     }
-
-    //     cv::Mat combined_img;
-    //     cv::hconcat(l_img_copy, r_img_copy, combined_img);
-
-    //     cv::Point2f Img_width_pt(ImgL.cols, 0);
-
-    //     for(auto & pairs:match_pairs){
-    //         line(combined_img,
-    //              l_keypt[pairs[0]].pt,
-    //              r_keypt[pairs[1]].pt+Img_width_pt,
-    //              cv::Scalar(255,255,255));
-    //     }
-    //     cv::imshow("Test", combined_img);
-    // }
 };
 
 class ImageProcessing{
@@ -110,9 +74,14 @@ public:
     int show_image(cv::Mat &imgL, cv::Mat &imgR, int wait);
 
     void match_stereo(float & depth, float & depth_err, PointCloud * pt_cld);
+    
     void get_3d_points(std::vector<cv::KeyPoint> &l_keypt,
                        std::vector<cv::KeyPoint> &r_keypt,
                        cv::Mat & l_des,
                        std::vector<std::vector<int>> &matched_pairs,
                        PointCloud * pt_cld);
+
+    void show_matches(std::vector<cv::KeyPoint> &l_keypt,
+                      std::vector<cv::KeyPoint> &r_keypt,
+                      std::vector<std::vector<int>> &matched_pairs);
 };
