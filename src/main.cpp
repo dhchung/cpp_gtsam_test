@@ -1,4 +1,5 @@
 #include <iostream>
+#include "data_path.h"
 #include "image_processing.h"
 #include "altimeter_processing.h"
 #include "pointcloud_processing.h"
@@ -26,11 +27,7 @@ void f1(string & img_dir, int & img_no, float & cur_depth, float &depth_err){
 }
 
 int main(int argc, char** argv){
-
-
-
-
-    string image_dir = "/media/dongha/BLACK_PANTH/Dataset/170316_data/RectifiedImgs_Color";
+    string image_dir = DATA_PATH;
 
     int data_num = 1388;
     alt_proc.load_altimeter(image_dir, data_num);
