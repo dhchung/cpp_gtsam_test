@@ -69,43 +69,159 @@ void ImageProcessing::apply_clahe(float clip_limit){
     
 }
 
-void ImageProcessing::match_stereo(float & depth, float & depth_err) {
+void ImageProcessing::match_stereo(float & depth, float & depth_err, PointCloud * pt_cld) {
     float short_depth = depth - depth_err;
     float long_depth = depth + depth_err;
 
     float max_pixel_diff = base_line*focal_length/short_depth;
     float min_pixel_diff = base_line*focal_length/long_depth;
 
-    surf.detectAndCompute_keypoints(p_l_img, p_r_img);
-    surf.match_stereo(min_pixel_diff, max_pixel_diff, 5);
+    std::vector<cv::KeyPoint> l_keypt;
+    std::vector<cv::KeyPoint> r_keypt;
 
-    
+    cv::Mat l_des;
+    cv::Mat r_des;
 
-    surf.show_matches(l_img, r_img);
-    // cv::waitKey(0);
+    surf.detectAndCompute_keypoints(p_l_img, p_r_img, &l_keypt, &r_keypt, &l_des, &r_des);
+
+    //Match Stereo
+
+    int l_feat_num = l_keypt.size();
+    int r_feat_num = r_keypt.size();
+
+    Eigen::Matrix2Xd l_feat_loc(2,l_feat_num);
+    Eigen::Matrix2Xd r_feat_loc(2,r_feat_num);
+
+    for(int i=0; i<l_feat_num; ++i){
+        l_feat_loc.col(i)<<l_keypt[i].pt.x, l_keypt[i].pt.y;
+    }
+    for(int i=0; i<r_feat_num; ++i){
+        r_feat_loc.col(i)<<r_keypt[i].pt.x, r_keypt[i].pt.y;
+    }
+
+    std::vector<std::vector<Matching_idx>> l2r_candid;
+    std::vector<std::vector<Matching_idx>> r2l_candid_mem;
+
+    l2r_candid.resize(l_feat_num);
+    r2l_candid_mem.resize(r_feat_num);
+
+    for(int l_pt_idx = 0; l_pt_idx<l_feat_num; ++l_pt_idx){
+        float base_y = l_keypt[l_pt_idx].pt.y;
+        float base_x = l_keypt[l_pt_idx].pt.x;
+        float base_s = l_keypt[l_pt_idx].size;
+
+
+        Eigen::VectorXd x_distance = r_feat_loc.row(0).array() - base_x;
+        Eigen::VectorXd y_distance = r_feat_loc.row(1).array() - base_y;
+
+        for(int i=0; i<r_feat_num; ++i){
+            if(x_distance(i)>0)
+                continue;
+
+            if(-x_distance(i) < min_pixel_diff)
+                continue;
+
+            if(-x_distance(i) > max_pixel_diff)
+                continue;
+
+            if(abs(y_distance(i))>max_pixel_diff)
+                continue;
+
+            if(abs(r_keypt[i].size-base_s)>5)
+                continue;
+
+            float distance = cv::norm(l_des.row(l_pt_idx), r_des.row(i));
+            if(distance>0.4)
+                continue;
+            if(!r2l_candid_mem[i].empty()){
+                bool is_min = false;
+                for(int j=0; j<r2l_candid_mem[i].size(); ++j){
+                    if(r2l_candid_mem[i][j].dist>distance) {
+                        is_min = true;
+                        for(int k=0; k<l2r_candid[r2l_candid_mem[i][j].idx].size();++k){
+                            if(l2r_candid[r2l_candid_mem[i][j].idx][k].idx==i){
+                                l2r_candid[r2l_candid_mem[i][j].idx].erase(l2r_candid[r2l_candid_mem[i][j].idx].begin()+k);
+                            }
+                        }
+                        r2l_candid_mem[i].erase(r2l_candid_mem[i].begin()+j);
+                    } else{
+                        is_min = false;
+                    }
+                }
+                if(!is_min)
+                    continue;
+            }
+
+            if(!l2r_candid[l_pt_idx].empty()){
+                bool is_min = false;
+                for(int j=0; j<l2r_candid[l_pt_idx].size(); ++j){
+                    float cur_dist = l2r_candid[l_pt_idx][j].dist;
+                    if(cur_dist>distance) {
+                        is_min = true;
+                        for(int k=0; k<r2l_candid_mem[l2r_candid[l_pt_idx][j].idx].size();++k) {
+                            if(r2l_candid_mem[l2r_candid[l_pt_idx][j].idx][k].idx==l_pt_idx){
+                                r2l_candid_mem[l2r_candid[l_pt_idx][j].idx].erase(r2l_candid_mem[l2r_candid[l_pt_idx][j].idx].begin()+k);
+                            }
+                        }
+                        l2r_candid[l_pt_idx].erase(l2r_candid[l_pt_idx].begin()+j);
+                        if(cur_dist/distance<0.8) {
+                            is_min = false;
+                        }
+                        
+                    } else{
+                        is_min = false;
+                    }
+                }
+                if(!is_min){
+                    continue;
+                }
+            }
+
+            l2r_candid[l_pt_idx].push_back(Matching_idx(i, distance));
+        }
+    }
+
+    std::vector<std::vector<int>> matched_pairs;
+    for(int i=0; i<l2r_candid.size(); ++i){
+        if(!l2r_candid[i].empty()){
+            matched_pairs.push_back(std::vector<int>{i, l2r_candid[i][0].idx});
+        }
+    }
+
+    get_3d_points(l_keypt, r_keypt, l_des, matched_pairs, pt_cld);
 }
 
-void ImageProcessing::get_3d_points(){
-    surf.point_3d.clear();
-    surf.point_3d.resize(surf.match_pairs.size());
-    for(int i=0; i<surf.match_pairs.size(); i++) {
-        float x_l = surf.l_keypt[surf.match_pairs[i][0]].pt.x;
-        float x_r = surf.r_keypt[surf.match_pairs[i][1]].pt.x;
-        float y_l = surf.l_keypt[surf.match_pairs[i][0]].pt.y;
+void ImageProcessing::get_3d_points(std::vector<cv::KeyPoint> &l_keypt,
+                                    std::vector<cv::KeyPoint> &r_keypt,
+                                    cv::Mat &l_des,
+                                    std::vector<std::vector<int>> &matched_pairs,
+                                    PointCloud * pt_cld){
+
+    pt_cld->point_cloud.resize(3, matched_pairs.size());
+    pt_cld->point_color.resize(3, matched_pairs.size());
+    pt_cld->point_des.resize(64, matched_pairs.size());
+    pt_cld->point_size.resize(matched_pairs.size());
+
+    for(int i=0; i<matched_pairs.size(); i++) {
+        float x_l = l_keypt[matched_pairs[i][0]].pt.x;
+        float x_r = r_keypt[matched_pairs[i][1]].pt.x;
+        float y_l = l_keypt[matched_pairs[i][0]].pt.y;
         
         float disparity = x_l-x_r;
 
+        pt_cld->point_cloud.col(i) << base_line/disparity*focal_length,
+                                     base_line/disparity*(x_l - img_center_x),
+                                     base_line/disparity*(y_l - img_center_y);
 
-        surf.point_3d[i].loc_3d_x = base_line/disparity*focal_length;
-        surf.point_3d[i].loc_3d_y = base_line/disparity*(x_l - img_center_x);
-        surf.point_3d[i].loc_3d_z = base_line/disparity*(y_l - img_center_y);
-
-
-        surf.point_3d[i].scale = surf.l_keypt[surf.match_pairs[i][0]].size;
         cv::Vec3b color = l_img.at<cv::Vec3b>(cv::Point(int(x_l), int(y_l)));
-        surf.point_3d[i].r = color[0];
-        surf.point_3d[i].g = color[1];
-        surf.point_3d[i].b = color[2];
+        pt_cld->point_color.col(i) << color[0], color[1], color[2];
+        pt_cld->point_size(i) = l_keypt[matched_pairs[i][0]].size;
+        Eigen::MatrixXf des;
+        cv::cv2eigen(l_des.row(matched_pairs[i][0]), des);
+        pt_cld->point_des.col(i) = des.transpose();
     }
+
+    // std::cout<<pt_cld->point_cloud<<std::endl;
+
 }
 
