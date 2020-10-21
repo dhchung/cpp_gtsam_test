@@ -45,6 +45,7 @@ int main(int argc, char** argv){
         // thread t1(f1, image_dir, i, cur_depth, depth_err);
         // f1(image_dir, i, cur_depth, depth_err);
         // t1.join();
+
         PointCloud ransac_point_3d;
         ransac_plane.perform_ransac_plane(pt_cld, &ransac_point_3d);
 

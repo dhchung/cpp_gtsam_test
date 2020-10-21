@@ -23,27 +23,9 @@ struct Matching_idx{
 
 struct SURFDetector
 {
-    struct SurfPoint3D{
-        float scale;
-        // cv::Mat descriptor;
-        float loc_3d_x;
-        float loc_3d_y;
-        float loc_3d_z;
-        int r;
-        int g;
-        int b;
-    };
-
-
     cv::Ptr<cv::Feature2D> surf;
     cv::Ptr<cv::Feature2D> extractor;
-
-
-    std::vector<std::vector<Matching_idx>> r2l_candid;
-
     std::vector<std::vector<int>> match_pairs;
-
-    std::vector<SurfPoint3D> point_3d;
 
     SURFDetector(float hessian = 200.0){
         int k = 0;

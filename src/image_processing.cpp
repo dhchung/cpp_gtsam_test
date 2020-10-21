@@ -100,10 +100,10 @@ void ImageProcessing::match_stereo(float & depth, float & depth_err, PointCloud 
     }
 
     std::vector<std::vector<Matching_idx>> l2r_candid;
-    std::vector<std::vector<Matching_idx>> r2l_candid_mem;
+    std::vector<std::vector<Matching_idx>> r2l_candid;
 
     l2r_candid.resize(l_feat_num);
-    r2l_candid_mem.resize(r_feat_num);
+    r2l_candid.resize(r_feat_num);
 
     for(int l_pt_idx = 0; l_pt_idx<l_feat_num; ++l_pt_idx){
         float base_y = l_keypt[l_pt_idx].pt.y;
@@ -124,7 +124,7 @@ void ImageProcessing::match_stereo(float & depth, float & depth_err, PointCloud 
             if(-x_distance(i) > max_pixel_diff)
                 continue;
 
-            if(abs(y_distance(i))>max_pixel_diff)
+            if(abs(y_distance(i))>5.0)
                 continue;
 
             if(abs(r_keypt[i].size-base_s)>5)
@@ -133,17 +133,18 @@ void ImageProcessing::match_stereo(float & depth, float & depth_err, PointCloud 
             float distance = cv::norm(l_des.row(l_pt_idx), r_des.row(i));
             if(distance>0.4)
                 continue;
-            if(!r2l_candid_mem[i].empty()){
+
+            if(!r2l_candid[i].empty()){
                 bool is_min = false;
-                for(int j=0; j<r2l_candid_mem[i].size(); ++j){
-                    if(r2l_candid_mem[i][j].dist>distance) {
+                for(int j=0; j<r2l_candid[i].size(); ++j){
+                    if(r2l_candid[i][j].dist>distance) {
                         is_min = true;
-                        for(int k=0; k<l2r_candid[r2l_candid_mem[i][j].idx].size();++k){
-                            if(l2r_candid[r2l_candid_mem[i][j].idx][k].idx==i){
-                                l2r_candid[r2l_candid_mem[i][j].idx].erase(l2r_candid[r2l_candid_mem[i][j].idx].begin()+k);
+                        for(int k=0; k<l2r_candid[r2l_candid[i][j].idx].size();++k){
+                            if(l2r_candid[r2l_candid[i][j].idx][k].idx==i){
+                                l2r_candid[r2l_candid[i][j].idx].erase(l2r_candid[r2l_candid[i][j].idx].begin()+k);
                             }
                         }
-                        r2l_candid_mem[i].erase(r2l_candid_mem[i].begin()+j);
+                        r2l_candid[i].erase(r2l_candid[i].begin()+j);
                     } else{
                         is_min = false;
                     }
@@ -158,15 +159,15 @@ void ImageProcessing::match_stereo(float & depth, float & depth_err, PointCloud 
                     float cur_dist = l2r_candid[l_pt_idx][j].dist;
                     if(cur_dist>distance) {
                         is_min = true;
-                        for(int k=0; k<r2l_candid_mem[l2r_candid[l_pt_idx][j].idx].size();++k) {
-                            if(r2l_candid_mem[l2r_candid[l_pt_idx][j].idx][k].idx==l_pt_idx){
-                                r2l_candid_mem[l2r_candid[l_pt_idx][j].idx].erase(r2l_candid_mem[l2r_candid[l_pt_idx][j].idx].begin()+k);
+                        for(int k=0; k<r2l_candid[l2r_candid[l_pt_idx][j].idx].size();++k) {
+                            if(r2l_candid[l2r_candid[l_pt_idx][j].idx][k].idx==l_pt_idx){
+                                r2l_candid[l2r_candid[l_pt_idx][j].idx].erase(r2l_candid[l2r_candid[l_pt_idx][j].idx].begin()+k);
                             }
                         }
                         l2r_candid[l_pt_idx].erase(l2r_candid[l_pt_idx].begin()+j);
-                        if(cur_dist/distance<0.8) {
-                            is_min = false;
-                        }
+                        // if(cur_dist/distance<0.8) {
+                        //     is_min = false;
+                        // }
                         
                     } else{
                         is_min = false;
@@ -178,6 +179,7 @@ void ImageProcessing::match_stereo(float & depth, float & depth_err, PointCloud 
             }
 
             l2r_candid[l_pt_idx].push_back(Matching_idx(i, distance));
+            r2l_candid[i].push_back(Matching_idx(l_pt_idx, distance));
         }
     }
 
