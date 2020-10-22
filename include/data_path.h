@@ -1,1 +1,1 @@
-#define DATA_PATH "/media/dongha/BLACK_PANTH/Dataset/170316_data/RectifiedImgs_Color"
+#define DATA_PATH "/media/dongha/HDD/Dataset/170316_data/RectifiedImgs_Color"
