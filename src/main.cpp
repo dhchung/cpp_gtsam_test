@@ -7,6 +7,7 @@
 #include <thread>
 #include <Eigen/Dense>
 #include "point_cloud.h"
+#include "opengl_point_cloud.h"
 
 
 using std::thread;
@@ -17,6 +18,8 @@ AltimeterProcessing alt_proc;
 PointCloudProcessing pt_cld_processing;
 RANSACPlane ransac_plane;
 PointCloud pt_cld;
+OpenglPointCloud ogl_ptcld;
+
 
 // void f1(string & img_dir, int & img_no, float & cur_depth, float &depth_err){
 //     img_proc.load_image(img_dir, img_no);
@@ -44,12 +47,12 @@ int main(int argc, char** argv){
         img_proc.match_stereo(cur_depth, depth_err, &pt_cld);
 
 
-        // PointCloud ransac_point_3d;
-        // ransac_plane.perform_ransac_plane(pt_cld, &ransac_point_3d);
+        PointCloud ransac_point_3d;
+        ransac_plane.perform_ransac_plane(pt_cld, &ransac_point_3d);
 
-        // pt_cld_processing.show_pointcloud(pt_cld);
+        pt_cld_processing.show_pointcloud(pt_cld);
 
-        // pt_cld_processing.show_pointcloud(ransac_point_3d);
+        pt_cld_processing.show_pointcloud(ransac_point_3d);
 
         
     }
