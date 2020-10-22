@@ -7,7 +7,12 @@
 #include <thread>
 #include <Eigen/Dense>
 #include "point_cloud.h"
-#include "opengl_point_cloud.h"
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 
 using std::thread;
@@ -18,16 +23,7 @@ AltimeterProcessing alt_proc;
 PointCloudProcessing pt_cld_processing;
 RANSACPlane ransac_plane;
 PointCloud pt_cld;
-OpenglPointCloud ogl_ptcld;
 
-
-// void f1(string & img_dir, int & img_no, float & cur_depth, float &depth_err){
-//     img_proc.load_image(img_dir, img_no);
-//     img_proc.apply_clahe(4.0);
-//     img_proc.show_image(img_proc.p_l_img, img_proc.p_r_img,1);
-//     img_proc.match_stereo(cur_depth, depth_err);
-//     img_proc.get_3d_points();
-// }
 
 int main(int argc, char** argv){
     string image_dir = DATA_PATH;
@@ -58,4 +54,5 @@ int main(int argc, char** argv){
     }
     return 0;
 }
+
 
