@@ -1,14 +1,19 @@
-#include <glad/glad.h>
+// #include <glad/glad.h>
+// #include <glad/glad.h>
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <iostream>
+#include <math.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include "point_cloud.h"
 #include "eigen3/Eigen/Dense"
+#include <glm/gtc/type_ptr.hpp>
+#include <stdlib.h>
+#include <stdio.h>
+
 #include <string>
 #include <vector>
-
-#include <iostream>
+#include "point_cloud.h"
 #include <stdlib.h>
 
 class OpenglPointProcessing{

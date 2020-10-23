@@ -10,13 +10,13 @@ OpenglPointProcessing::~OpenglPointProcessing(){
 
 void OpenglPointProcessing::init_opengl(){
     glfwInit(); //Initialize GLFW
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,3); //OpenGL 3.3
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); //Use only core profiles of opengl
+    // glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,3);
+    // glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,3); //OpenGL 3.3
+    // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); //Use only core profiles of opengl
     //Setting up GLFW : https://www.glfw.org/docs/latest/window.html#window_hints
 
     //Making window
-    window = glfwCreateWindow(800,600, w_name.c_str(), NULL, NULL);
+    window = glfwCreateWindow(640,480, "Test opengl", NULL, NULL);
     if(window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -24,13 +24,23 @@ void OpenglPointProcessing::init_opengl(){
     
     glfwMakeContextCurrent(window); //Tell GLFW to setup "window context" as primary context for current thread
 
-    //GLAD : take care of the OpenGL function pointer : Need to initialize it before calling OpenGL functions
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) { //glfwGetProcAddress : Get correct functions regarding to OS or compile environment
-        std::cout<< "Failed to initialize GLAD" << std::endl;
-    }
+    
+    // if (!glfwInit())
+    //     exit(EXIT_FAILURE);
+    // window = glfwCreateWindow(640, 480, "Chapter 1: Simple GLFW Example", NULL, NULL);
 
-    glViewport(0,0,800,600); // Setup the viewport size (location of the viewport in the window, width and height of the window)
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    // if (!window)
+    // {
+    //     glfwTerminate();
+    //     exit(EXIT_FAILURE);
+    // }
+    // glfwMakeContextCurrent(window);
+
+    float ratio;
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    ratio = (float) width / (float) height;
+    glViewport(0, 0, width, height);
 }
 
 void OpenglPointProcessing::framebuffer_size_callback(GLFWwindow* window, int width, int height) { // Change viewport if the user change the size of the window
@@ -44,19 +54,32 @@ void OpenglPointProcessing::processInput() {
 }
 
 void OpenglPointProcessing::plot_3d_points(PointCloud * pt_cld){
-    clear_window();
+        glClear(GL_COLOR_BUFFER_BIT);
 
-    glColor3f(1,0,0);                        // 정점의 색은 빨간색
-    glBegin(GL_POINTS);                // 점만 찍어낸다.
-    glVertex2f(0.0, 0.5);
-    glVertex2f(-0.5, -0.5);
-    glVertex2f(0.5, -0.5);
-    glEnd();
-    glFlush();    
+    float ratio;
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
 
-    glfwSwapBuffers(window); //e.g. double buffer -> Swap the color buffer
-    glfwPollEvents(); // Check any events(keyboard or mouse), update the window status, and callback the functions  
 
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+
+        glRotatef((float)glfwGetTime() * 50.f, 0.f, 0.f, 1.f);
+        
+        glBegin(GL_TRIANGLES);
+        glColor3f(1.f, 0.f, 0.f);
+        glVertex3f(-0.6f, -0.4f, 0.f);
+        glColor3f(0.f, 1.f, 0.f);
+        glVertex3f(0.6f, -0.4f, 0.f);
+        glColor3f(0.f, 0.f, 1.f);
+        glVertex3f(0.f, 0.6f, 0.f);
+        glEnd();
+        
+        glfwSwapBuffers(window);
+        glfwPollEvents();   
 }
 
 
