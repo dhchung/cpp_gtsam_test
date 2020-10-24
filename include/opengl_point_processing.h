@@ -19,9 +19,15 @@
 class OpenglPointProcessing{
 public:
 
-    std::string w_name;
     OpenglPointProcessing(std::string window_name);
     ~OpenglPointProcessing();
+
+    std::string w_name;
+
+    typedef struct{
+        GLfloat x, y, z;
+        GLfloat r, g, b, a;
+    } Vertex;
 
     void init_opengl();
     static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -29,7 +35,11 @@ public:
 
     GLFWwindow * window;
     void clear_window();
-    void plot_3d_points(PointCloud * pt_cld);
-    void plot_global_points(std::vector<PointCloud> * g_pt_cld);
+    void draw_points(Vertex v, GLfloat size);
+    void drawPointsDemo(int width, int height);
+    void draw_point_3d(PointCloud & pt_cld, GLfloat size);
+
+    void plot_3d_points(PointCloud & pt_cld);
+    void plot_global_points(std::vector<PointCloud> & g_pt_cld);
     void terminate();
 };
