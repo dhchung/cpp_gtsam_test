@@ -38,6 +38,7 @@ public:
     void draw_points(Vertex v, GLfloat size);
     void drawPointsDemo(int width, int height);
     void draw_point_3d(PointCloud & pt_cld, GLfloat size);
+    void draw_axis(float line_length, float line_width);
 
     void plot_3d_points(PointCloud & pt_cld);
     void plot_global_points(std::vector<PointCloud> & g_pt_cld);

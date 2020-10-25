@@ -216,7 +216,7 @@ void ImageProcessing::get_3d_points(std::vector<cv::KeyPoint> &l_keypt,
                                      base_line/disparity*(y_l - img_center_y);
 
         cv::Vec3b color = l_img.at<cv::Vec3b>(cv::Point(int(x_l), int(y_l)));
-        pt_cld->point_color.col(i) << color[0], color[1], color[2];
+        pt_cld->point_color.col(i) << color[2], color[1], color[0];
         pt_cld->point_size(i) = l_keypt[matched_pairs[i][0]].size;
         Eigen::MatrixXf des;
         cv::cv2eigen(l_des.row(matched_pairs[i][0]), des);

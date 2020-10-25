@@ -8,6 +8,7 @@
 #include <Eigen/Dense>
 #include "point_cloud.h"
 #include "opengl_point_processing.h"
+// #include "slam.h"
 
 
 using std::thread;
@@ -37,7 +38,7 @@ int main(int argc, char** argv){
 
         img_proc.load_image(image_dir, i);
         img_proc.apply_clahe(4.0);
-        img_proc.show_image(img_proc.p_l_img, img_proc.p_r_img,1);
+        img_proc.show_image(img_proc.l_img, img_proc.r_img,1);
         img_proc.match_stereo(cur_depth, depth_err, &pt_cld);
 
 
