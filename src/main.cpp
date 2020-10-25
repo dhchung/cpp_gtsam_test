@@ -2,7 +2,7 @@
 #include "data_path.h"
 #include "image_processing.h"
 #include "altimeter_processing.h"
-#include "pointcloud_processing.h"
+// #include "pointcloud_processing.h"
 #include "ransac_plane.h"
 #include <thread>
 #include <Eigen/Dense>
@@ -16,7 +16,7 @@ using namespace std;
 
 ImageProcessing img_proc;
 AltimeterProcessing alt_proc;
-PointCloudProcessing pt_cld_processing;
+// PointCloudProcessing pt_cld_processing;
 RANSACPlane ransac_plane;
 PointCloud pt_cld;
 OpenglPointProcessing ogl_pt_processing("asdf");
