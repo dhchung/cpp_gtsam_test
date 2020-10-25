@@ -10,7 +10,14 @@ OpenglPointProcessing::~OpenglPointProcessing(){
 
 void OpenglPointProcessing::init_opengl(){
     glfwInit(); //Initialize GLFW
-    window = glfwCreateWindow(640,480, "Test opengl", NULL, NULL);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+
+
+
+    window = glfwCreateWindow(640,480, "3D Point Cloud (non-sequential)", NULL, NULL);
     if(window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -41,21 +48,22 @@ void OpenglPointProcessing::plot_3d_points(PointCloud & pt_cld){
     glfwGetFramebufferSize(window, &width, &height);
     ratio = (float) width / (float) height;
     glViewport(0, 0, width, height);
-    glClear(GL_COLOR_BUFFER_BIT);
+    // glClear(GL_COLOR_BUFFER_BIT);
+    clear_window();
 
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    // glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+    glOrtho(-ratio, ratio, -1.f, 1.f, 10.f, -10.f);
+    gluLookAt(-1.0, -1.0, -1.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.0);
 
-
-    glOrtho(-2, 2, -2.f, 2.f, 10.f, -10.f);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     draw_point_3d(pt_cld, 3.0f);
+    draw_axis(0.3, 2);
     
     glfwSwapBuffers(window);
     glfwPollEvents();   
@@ -73,7 +81,7 @@ void OpenglPointProcessing::terminate(){
 
 void OpenglPointProcessing::clear_window(){
     processInput();
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(28.0/255.0, 40.0/255.0, 79.0/255.0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
@@ -98,3 +106,21 @@ void OpenglPointProcessing::draw_point_3d(PointCloud & pt_cld, GLfloat size){
         draw_points(v1, size);
     }
 };
+
+void OpenglPointProcessing::draw_axis(float line_length, float line_width){
+    glLineWidth(line_width);
+    glBegin(GL_LINES);
+    //x
+    glColor4f(1.0f,0.0f,0.0f,1.0f);
+    glVertex3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(line_length, 0.0f, 0.0f);
+    //y
+    glColor4f(0.0f,1.0f,0.0f,1.0f);
+    glVertex3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(0.0f, line_length, 0.0f);
+    //z
+    glColor4f(0.0f,0.0f,1.0f,1.0f);
+    glVertex3f(0.0f, 0.0f, 0.0f);
+    glVertex3f(0.0f, 0.0f, line_length);
+    glEnd();
+}
