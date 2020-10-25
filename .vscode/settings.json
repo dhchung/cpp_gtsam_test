@@ -63,5 +63,6 @@
         "csignal": "cpp",
         "valarray": "cpp",
         "dense": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "Enabled"
 }
