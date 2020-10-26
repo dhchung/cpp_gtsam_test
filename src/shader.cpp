@@ -1,6 +1,8 @@
 #include "shader.h"
 
-Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath) {
+Shader::Shader(){}
+
+void Shader::InitShader(const GLchar* vertexPath, const GLchar* fragmentPath) {
     //1. Get the source code of vertex/fragment shader by file path
     std::string vertexCode;
     std::string fragmentCode;

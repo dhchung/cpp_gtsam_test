@@ -39,7 +39,7 @@ int main(int argc, char** argv){
 
     std::vector<PointCloud> global_cloud;
 
-    for(int i = 120; i<data_num+1; ++i) {
+    for(int i = 120; i<data_num-6; ++i) {
 
         std::vector<float> cur_dr_state = dr_processing.nav_data[i];
         std::vector<float> rel_dr_prev_state = dr_processing.rel_nav_data[i-1];
@@ -63,9 +63,11 @@ int main(int argc, char** argv){
         // pt_cld_processing.show_pointcloud(pt_cld);
 
         // pt_cld_processing.show_pointcloud(ransac_point_3d);
-        ogl_pt_processing.plot_3d_points(ransac_point_3d);
+        // ogl_pt_processing.plot_3d_points(ransac_point_3d);
+        ogl_pt_processing.plot_global_points(global_cloud, ransac_point_3d.state);
         
     }
+    ogl_pt_processing.terminate();
     return 0;
 }
 

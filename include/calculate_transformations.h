@@ -1,4 +1,4 @@
-
+#pragma once
 #include <math.h>
 #include <eigen3/Eigen/Dense>
 #include <iostream>
