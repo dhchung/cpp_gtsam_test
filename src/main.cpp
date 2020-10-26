@@ -9,6 +9,7 @@
 #include "point_cloud.h"
 #include "opengl_point_processing.h"
 // #include "slam.h"
+#include "dr_processing.h"
 
 
 using std::thread;
@@ -19,7 +20,9 @@ AltimeterProcessing alt_proc;
 // PointCloudProcessing pt_cld_processing;
 RANSACPlane ransac_plane;
 PointCloud pt_cld;
-OpenglPointProcessing ogl_pt_processing("asdf");
+OpenglPointProcessing ogl_pt_processing("3D Point Cloud (non-sequential)");
+
+DrProcessing dr_processing;
 
 int main(int argc, char** argv){
 
@@ -30,8 +33,16 @@ int main(int argc, char** argv){
     int data_num = 1388;
     alt_proc.load_altimeter(image_dir, data_num);
     float depth_err = 300;
-    
+
+    dr_processing.load_dr(image_dir, data_num);
+
+
+    std::vector<PointCloud> global_cloud;
+
     for(int i = 120; i<data_num+1; ++i) {
+
+        std::vector<float> cur_dr_state = dr_processing.nav_data[i];
+        std::vector<float> rel_dr_prev_state = dr_processing.rel_nav_data[i-1];
 
         float cur_depth = alt_proc.depth[i-1];
         //Image pre-processing
@@ -44,12 +55,15 @@ int main(int argc, char** argv){
 
         PointCloud ransac_point_3d;
         ransac_plane.perform_ransac_plane(pt_cld, &ransac_point_3d);
+        ransac_point_3d.input_gt_state(cur_dr_state);
+        ransac_point_3d.input_rel_state(rel_dr_prev_state);
+
+        global_cloud.push_back(ransac_point_3d);
 
         // pt_cld_processing.show_pointcloud(pt_cld);
 
         // pt_cld_processing.show_pointcloud(ransac_point_3d);
         ogl_pt_processing.plot_3d_points(ransac_point_3d);
-
         
     }
     return 0;

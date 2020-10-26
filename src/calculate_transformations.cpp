@@ -16,9 +16,73 @@ void CalTransform::xyzrpy2t(float x, float y, float z, float roll, float pitch, 
 
     T->setZero(4,4);
     T->block(0,0,3,3) = R;
+    T->block(0,3,3,1) = trans;
     T->operator()(3,3) = 1.0f;
 
 }
+
+void CalTransform::xyzrpy2t(std::vector<float> state, Eigen::Matrix4f * T){
+
+    float x = state[0];
+    float y = state[1];
+    float z = state[2];
+    float roll = state[3];
+    float pitch = state[4];
+    float yaw = state[5];
+    
+    Eigen::Matrix3f R;
+    rpy2r(roll, pitch, yaw, &R);
+    Eigen::Vector3f trans;
+    trans << x, y, z;
+
+    T->setZero(4,4);
+    T->block(0,0,3,3) = R;
+    T->block(0,3,3,1) = trans;
+    T->operator()(3,3) = 1.0f;
+
+}
+
+
+Eigen::Matrix4f CalTransform::xyzrpy2t(float x, float y, float z, float roll, float pitch, float yaw){
+
+    Eigen::Matrix3f R;
+    rpy2r(roll, pitch, yaw, &R);
+    Eigen::Vector3f trans;
+    trans << x, y, z;
+
+    Eigen::Matrix4f T;
+
+    T.setZero(4,4);
+    T.block(0,0,3,3) = R;
+    T.block(0,3,3,1) = trans;
+    T(3,3) = 1.0f;
+
+    return T;
+}
+
+Eigen::Matrix4f CalTransform::xyzrpy2t(std::vector<float> state){
+
+    float x = state[0];
+    float y = state[1];
+    float z = state[2];
+    float roll = state[3];
+    float pitch = state[4];
+    float yaw = state[5];
+    
+    Eigen::Matrix3f R;
+    rpy2r(roll, pitch, yaw, &R);
+    Eigen::Vector3f trans;
+    trans << x, y, z;
+
+    Eigen::Matrix4f T;
+
+    T.setZero(4,4);
+    T.block(0,0,3,3) = R;
+    T.block(0,3,3,1) = trans;
+    T(3,3) = 1.0f;
+    return T;
+}
+
 
 
 void CalTransform::t2xyzrpy(Eigen::Matrix4f T, std::vector<float> * xyzrpy){
