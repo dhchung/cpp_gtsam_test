@@ -10,24 +10,32 @@ OpenglPointProcessing::~OpenglPointProcessing(){
 
 void OpenglPointProcessing::init_opengl(){
     glfwInit(); //Initialize GLFW
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+    glfwWindowHint(GLFW_SAMPLES, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR,3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,3); //OpenGL 3.3
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); //Use only core profiles of opengl
 
 
-
-    window = glfwCreateWindow(640,480, "3D Point Cloud (non-sequential)", NULL, NULL);
+    window = glfwCreateWindow(640,480, w_name.c_str(), NULL, NULL);
     if(window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
     }
     
     glfwMakeContextCurrent(window); //Tell GLFW to setup "window context" as primary context for current thread
-    glEnable(GL_POINT_SMOOTH);
-    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // glewExperimental = true;
+
+    Shader ourShader("shaders/pointcloud.vert", "shaders/pointcloud.frag");
+
+    // GLuint l_programId = LoadShaders("shaders/pointcloud.vert", "shaders/pointcloud.frag");
+
+    // glDisable(GL_DEPTH_TEST);
+    // glEnable(GL_BLEND);
+    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// GLuint l_mvpMatrixId = glGetUniformLocation(l_programId, "MVP");
+    // glUseProgram(l_programId);
 
 }
 
@@ -55,13 +63,14 @@ void OpenglPointProcessing::plot_3d_points(PointCloud & pt_cld){
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(-ratio, ratio, -1.f, 1.f, 10.f, -10.f);
+
     gluLookAt(-1.0, -1.0, -1.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.0);
 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     draw_point_3d(pt_cld, 3.0f);
     draw_axis(0.3, 2);
     
@@ -72,7 +81,36 @@ void OpenglPointProcessing::plot_3d_points(PointCloud & pt_cld){
 
 
 void OpenglPointProcessing::plot_global_points(std::vector<PointCloud> & g_pt_cld){
+    float ratio;
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    ratio = (float) width / (float) height;
+    glViewport(0, 0, width, height);
+    // glClear(GL_COLOR_BUFFER_BIT);
+    clear_window();
+
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-ratio, ratio, -1.f, 1.f, 10.f, -10.f);
+    gluLookAt(-1.0, -1.0, -1.0, 1.0, 0.0, 0.0, 0.0, 0.0, -1.0);
+
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    draw_point_global(g_pt_cld, 3.0f);
+    draw_axis(0.3, 2);
     
+    glfwSwapBuffers(window);
+    glfwPollEvents();   
+}
+
+void OpenglPointProcessing::draw_point_global(std::vector<PointCloud> & global_cloud, GLfloat size){
+
 }
 
 void OpenglPointProcessing::terminate(){

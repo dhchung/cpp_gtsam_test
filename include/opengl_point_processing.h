@@ -1,12 +1,12 @@
-// #include <glad/glad.h>
-// #include <glad/glad.h>
-#include <GL/glew.h>
+#include <glad/glad.h>
+
+// #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <math.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include "eigen3/Eigen/Dense"
+#include "Eigen/Dense"
 #include <glm/gtc/type_ptr.hpp>
 #include <stdlib.h>
 #include <stdio.h>
@@ -14,7 +14,8 @@
 #include <string>
 #include <vector>
 #include "point_cloud.h"
-#include <stdlib.h>
+// #include "shader_2.h"
+#include "shader.h"
 
 class OpenglPointProcessing{
 public:
@@ -38,6 +39,8 @@ public:
     void draw_points(Vertex v, GLfloat size);
     void drawPointsDemo(int width, int height);
     void draw_point_3d(PointCloud & pt_cld, GLfloat size);
+    void draw_point_global(std::vector<PointCloud> & global_cloud, GLfloat size);
+
     void draw_axis(float line_length, float line_width);
 
     void plot_3d_points(PointCloud & pt_cld);
