@@ -19,6 +19,8 @@ public:
     Eigen::MatrixXf point_des;
     Eigen::VectorXf point_size;
 
+    Eigen::Vector4f plane_model;
+
 
     void input_rel_state(std::vector<float> & relative_state);
     void input_gt_state(std::vector<float> & groundtruth_state);

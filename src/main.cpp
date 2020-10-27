@@ -64,7 +64,7 @@ int main(int argc, char** argv){
 
         // pt_cld_processing.show_pointcloud(ransac_point_3d);
         // ogl_pt_processing.plot_3d_points(ransac_point_3d);
-        ogl_pt_processing.plot_global_points(global_cloud, ransac_point_3d.state);
+        ogl_pt_processing.plot_global_points(global_cloud, ransac_point_3d.state, i);
         
     }
     ogl_pt_processing.terminate();

@@ -1,3 +1,7 @@
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
 #include "opengl_point_processing.h"
 
 
@@ -127,7 +131,8 @@ glm::mat4 OpenglPointProcessing::eigen_mat4_to_glm_mat4(Eigen::Matrix4f & e_mat4
 
 
 void OpenglPointProcessing::plot_global_points(std::vector<PointCloud> & g_pt_cld,
-                                               std::vector<float> & state){
+                                               std::vector<float> & state,
+                                               int & idx){
 
     clear_window();
 
@@ -201,6 +206,12 @@ void OpenglPointProcessing::plot_global_points(std::vector<PointCloud> & g_pt_cl
     glfwSwapBuffers(window);
     glfwPollEvents();        
 
+    // GLubyte * pixels = new GLubyte[3*screenWidth*screenHeight];
+    // glReadPixels(0, 0, screenWidth, screenHeight, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+    // std::string image_title = "image/img"+std::to_string(idx)+".png";
+    // stbi_flip_vertically_on_write(true);
+    // stbi_write_png(image_title.c_str(), screenWidth, screenHeight, 3, pixels, screenWidth*3);
+    // delete[] pixels;
 
 }
 

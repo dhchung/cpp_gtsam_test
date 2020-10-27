@@ -104,3 +104,7 @@ void RANSACPlane::get_indices(Eigen::VectorXf & distance,
         }
     }
 }
+
+void RANSACPlane::estimate_plane(PointCloud * input){
+    
+}

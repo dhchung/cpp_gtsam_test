@@ -1,3 +1,8 @@
+#pragma once
+
+
+
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -15,7 +20,6 @@
 // #include "shader_2.h"
 #include "shader.h"
 #include "calculate_transformations.h"
-
 class OpenglPointProcessing{
 public:
 
@@ -53,7 +57,7 @@ public:
     void draw_axis(float line_length, float line_width);
 
     void plot_3d_points(PointCloud & pt_cld);
-    void plot_global_points(std::vector<PointCloud> & g_pt_cld, std::vector<float> & state);
+    void plot_global_points(std::vector<PointCloud> & g_pt_cld, std::vector<float> & state, int & idx);
     void terminate();
 
     glm::mat4 eigen_mat4_to_glm_mat4(Eigen::Matrix4f & e_mat4);

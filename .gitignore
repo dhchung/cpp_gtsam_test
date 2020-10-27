@@ -1,3 +1,4 @@
 build/
 /include/data_path.h
 core
+image/

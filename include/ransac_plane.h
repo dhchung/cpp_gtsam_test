@@ -17,4 +17,6 @@ public:
     void get_indices(Eigen::VectorXf & distance, 
                      std::vector<int> * idx, 
                      float & distnace_threshold);
+
+    void estimate_plane(PointCloud * input);
 };
