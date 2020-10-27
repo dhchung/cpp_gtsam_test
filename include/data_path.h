@@ -1,1 +1,0 @@
-#define DATA_PATH "/media/dongha/HDD/Dataset/170316_data/RectifiedImgs_Color"
