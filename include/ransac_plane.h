@@ -19,4 +19,5 @@ public:
                      float & distnace_threshold);
 
     void estimate_plane(PointCloud * input);
+    void estimate_plane_with_uncertainty(PointCloud * input);
 };

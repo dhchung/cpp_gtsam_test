@@ -9,6 +9,8 @@ public:
     bool rel_state_exist;
     bool gt_state_exist;
 
+    bool plane_uncertainty;
+
     std::vector<float> state;
     std::vector<float> rel_state;
 
@@ -20,7 +22,7 @@ public:
     Eigen::VectorXf point_size;
 
     Eigen::Vector4f plane_model;
-
+    
 
     void input_rel_state(std::vector<float> & relative_state);
     void input_gt_state(std::vector<float> & groundtruth_state);
