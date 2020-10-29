@@ -1,11 +1,6 @@
 #include "image_processing.h"
 ImageProcessing::ImageProcessing(){
     clahe = cv::createCLAHE();
-    base_line = 120.0;
-    img_center_x = 236.0;
-    img_center_y = 172.0;
-    focal_length = 526.0;
-
 }
 ImageProcessing::~ImageProcessing(){
 
@@ -69,7 +64,7 @@ void ImageProcessing::apply_clahe(float clip_limit){
     
 }
 
-void ImageProcessing::match_stereo(float & depth, float & depth_err, PointCloud * pt_cld) {
+void ImageProcessing::match_stereo(float & depth, PointCloud * pt_cld) {
     float short_depth = depth - depth_err;
     float long_depth = depth + depth_err;
 

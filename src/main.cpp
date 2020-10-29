@@ -10,6 +10,7 @@
 #include "opengl_point_processing.h"
 // #include "slam.h"
 #include "dr_processing.h"
+#include "parameters.h"
 
 
 using std::thread;
@@ -32,7 +33,6 @@ int main(int argc, char** argv){
 
     int data_num = 1388;
     alt_proc.load_altimeter(image_dir, data_num);
-    float depth_err = 300;
 
     dr_processing.load_dr(image_dir, data_num);
 
@@ -50,7 +50,7 @@ int main(int argc, char** argv){
         img_proc.load_image(image_dir, i);
         img_proc.apply_clahe(4.0);
         img_proc.show_image(img_proc.l_img, img_proc.r_img,1);
-        img_proc.match_stereo(cur_depth, depth_err, &pt_cld);
+        img_proc.match_stereo(cur_depth, &pt_cld);
 
 
         PointCloud ransac_point_3d;

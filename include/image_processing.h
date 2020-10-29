@@ -10,6 +10,7 @@
 #include <algorithm>
 #include "point_cloud.h"
 #include <opencv2/core/eigen.hpp>
+#include "parameters.h"
 
 
 struct Matching_idx{
@@ -50,11 +51,6 @@ class ImageProcessing{
 public:
     ImageProcessing();
     ~ImageProcessing();
-    float base_line;
-    float img_center_x;
-    float img_center_y;
-    float focal_length;
-
 
     cv::Mat l_img;
     cv::Mat r_img;
@@ -73,7 +69,7 @@ public:
     int show_image(int wait);
     int show_image(cv::Mat &imgL, cv::Mat &imgR, int wait);
 
-    void match_stereo(float & depth, float & depth_err, PointCloud * pt_cld);
+    void match_stereo(float & depth, PointCloud * pt_cld);
     
     void get_3d_points(std::vector<cv::KeyPoint> &l_keypt,
                        std::vector<cv::KeyPoint> &r_keypt,
