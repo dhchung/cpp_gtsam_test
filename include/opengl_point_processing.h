@@ -17,7 +17,6 @@
 #include <string>
 #include <vector>
 #include "point_cloud.h"
-// #include "shader_2.h"
 #include "shader.h"
 #include "calculate_transformations.h"
 class OpenglPointProcessing{

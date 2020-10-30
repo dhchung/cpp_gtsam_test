@@ -215,7 +215,74 @@ void OpenglPointProcessing::plot_global_points(std::vector<PointCloud> & g_pt_cl
 
 }
 
-void OpenglPointProcessing::draw_point_global(std::vector<PointCloud> & global_cloud, GLfloat size){
+void OpenglPointProcessing::draw_point_global(std::vector<PointCloud> & g_pt_cld, GLfloat size){
+
+    // clear_window();
+
+    // glm::mat4 model = glm::mat4(1.0f);
+    // glm::mat4 view = glm::mat4(1.0f);
+    // glm::mat4 projection = glm::mat4(1.0f);
+
+
+    // for(int data_id = 0; data_id<g_pt_cld.size(); ++data_id){
+
+    //     int data_size = g_pt_cld[data_id].point_cloud.cols();
+
+    //     float vertices[6*data_size];
+    
+    //     for(int i = 0; i<data_size; ++i){
+    //         for(int j = 0; j<3; ++j){
+    //             vertices[i*6+j] = g_pt_cld[data_id].point_cloud(j,i)/1000.0f;
+    //         }
+    //         for(int j = 3; j<6; ++j){
+    //             vertices[i*6+j] = g_pt_cld[data_id].point_color(j-3,i)/255.0f;
+    //         }
+    //     }
+
+    //     glBindVertexArray(VAO);
+    //     glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    //     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    //     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
+    //     glEnableVertexAttribArray(0);
+
+    //     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+    //     glEnableVertexAttribArray(1);
+
+    //     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //     glBindVertexArray(0);
+
+
+    //     //Model and camera;
+
+
+    //     Eigen::Matrix4f cur_state;
+        
+    //     c_trans.xyzrpy2t(g_pt_cld[data_id].state, &cur_state);
+
+    //     model = eigen_mat4_to_glm_mat4(cur_state);
+
+    //     projection = glm::perspective(glm::radians(45.0f),
+    //                                     float(screenWidth)/float(screenHeight), 
+    //                                     0.1f, 
+    //                                     100.0f);
+
+
+
+    //     shader.use();
+    //     shader.setMat4("model", model);
+    //     shader.setMat4("view", view);
+    //     shader.setMat4("projection", projection);
+        
+    //     glBindVertexArray(VAO);
+    //     glPointSize(3.0);
+    //     glDrawArrays(GL_POINTS, 0, data_size);
+    //     glBindVertexArray(0);
+
+    // }
+
+    // glfwSwapBuffers(window);
+    // glfwPollEvents();        
 
 }
 
