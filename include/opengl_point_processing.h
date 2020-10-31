@@ -19,6 +19,8 @@
 #include "point_cloud.h"
 #include "shader.h"
 #include "calculate_transformations.h"
+#include "camera.h"
+
 class OpenglPointProcessing{
 public:
 
@@ -32,9 +34,16 @@ public:
 
     int screenWidth;
     int screenHeight;
+    float lastX;
+    float lastY;
+    bool firstMouse;
+    float deltaTime;
+    float lastFrame;
+
 
     CalTransform c_trans;
 
+    Camera * camera;
 
 
     typedef struct{
@@ -45,12 +54,13 @@ public:
     void init_opengl();
     static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
     void processInput();
+    void processInput_end();
 
     GLFWwindow * window;
     void clear_window();
-    void draw_points(Vertex v, GLfloat size);
-    void drawPointsDemo(int width, int height);
-    void draw_point_3d(PointCloud & pt_cld, GLfloat size);
+
+
+
     void draw_point_global(std::vector<PointCloud> & global_cloud, GLfloat size);
 
     void draw_axis(float line_length, float line_width);
@@ -60,4 +70,11 @@ public:
     void terminate();
 
     glm::mat4 eigen_mat4_to_glm_mat4(Eigen::Matrix4f & e_mat4);
+
+
+    static void mouse_callback(GLFWwindow * window, double xpos, double ypos);
+    static void scroll_callback(GLFWwindow * window, double xoffset, double yoffset);
+
+    void mouse_callback_function(double xpos, double ypos);
+    void scroll_callback_function(double xoffset, double yoffset);
 };

@@ -9,7 +9,18 @@ OpenglPointProcessing::OpenglPointProcessing(std::string window_name){
     w_name = window_name;
     screenWidth = 800;
     screenHeight = 600;
+
+    camera = new Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,0.0f,-1.0f));
+
+    lastX = (float)screenWidth/2.0f;
+    lastY = (float)screenHeight/2.0f;
+    firstMouse = true;
+
+    deltaTime = 0.0f;
+    lastFrame = 0.0f;
+    
 }
+
 OpenglPointProcessing::~OpenglPointProcessing(){
 
 }
@@ -22,11 +33,16 @@ void OpenglPointProcessing::init_opengl(){
 
 
     window = glfwCreateWindow(screenWidth,screenHeight, w_name.c_str(), NULL, NULL);
+
+    glfwSetWindowUserPointer(window, this);
+
+
     if(window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
     }
     
+
     glfwMakeContextCurrent(window); //Tell GLFW to setup "window context" as primary context for current thread
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) { //glfwGetProcAddress : Get correct functions regarding to OS or compile environment
@@ -217,73 +233,83 @@ void OpenglPointProcessing::plot_global_points(std::vector<PointCloud> & g_pt_cl
 
 void OpenglPointProcessing::draw_point_global(std::vector<PointCloud> & g_pt_cld, GLfloat size){
 
-    // clear_window();
 
-    // glm::mat4 model = glm::mat4(1.0f);
-    // glm::mat4 view = glm::mat4(1.0f);
-    // glm::mat4 projection = glm::mat4(1.0f);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+    while(!glfwWindowShouldClose(window)){
+        processInput_end();
+        glClearColor(28.0/255.0, 40.0/255.0, 79.0/255.0, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
 
-    // for(int data_id = 0; data_id<g_pt_cld.size(); ++data_id){
+        glm::mat4 model = glm::mat4(1.0f);
+        glm::mat4 view = glm::mat4(1.0f);
+        glm::mat4 projection = glm::mat4(1.0f);
 
-    //     int data_size = g_pt_cld[data_id].point_cloud.cols();
-
-    //     float vertices[6*data_size];
-    
-    //     for(int i = 0; i<data_size; ++i){
-    //         for(int j = 0; j<3; ++j){
-    //             vertices[i*6+j] = g_pt_cld[data_id].point_cloud(j,i)/1000.0f;
-    //         }
-    //         for(int j = 3; j<6; ++j){
-    //             vertices[i*6+j] = g_pt_cld[data_id].point_color(j-3,i)/255.0f;
-    //         }
-    //     }
-
-    //     glBindVertexArray(VAO);
-    //     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    //     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    //     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
-    //     glEnableVertexAttribArray(0);
-
-    //     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
-    //     glEnableVertexAttribArray(1);
-
-    //     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    //     glBindVertexArray(0);
+        shader.use();
+        projection = glm::perspective(glm::radians(camera->Zoom), (float)screenWidth/2/(float)screenHeight, 0.1f, 100.0f);
+        view = camera->GetViewMatrix();
 
 
-    //     //Model and camera;
 
+        for(int data_id = 0; data_id<g_pt_cld.size(); ++data_id){
 
-    //     Eigen::Matrix4f cur_state;
+            int data_size = g_pt_cld[data_id].point_cloud.cols();
+
+            float vertices[6*data_size];
         
-    //     c_trans.xyzrpy2t(g_pt_cld[data_id].state, &cur_state);
+            for(int i = 0; i<data_size; ++i){
+                for(int j = 0; j<3; ++j){
+                    vertices[i*6+j] = g_pt_cld[data_id].point_cloud(j,i)/1000.0f;
+                }
+                for(int j = 3; j<6; ++j){
+                    vertices[i*6+j] = g_pt_cld[data_id].point_color(j-3,i)/255.0f;
+                }
+            }
 
-    //     model = eigen_mat4_to_glm_mat4(cur_state);
+            glBindVertexArray(VAO);
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    //     projection = glm::perspective(glm::radians(45.0f),
-    //                                     float(screenWidth)/float(screenHeight), 
-    //                                     0.1f, 
-    //                                     100.0f);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
+            glEnableVertexAttribArray(0);
+
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+            glEnableVertexAttribArray(1);
+
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
 
 
+            //Model and camera;
 
-    //     shader.use();
-    //     shader.setMat4("model", model);
-    //     shader.setMat4("view", view);
-    //     shader.setMat4("projection", projection);
-        
-    //     glBindVertexArray(VAO);
-    //     glPointSize(3.0);
-    //     glDrawArrays(GL_POINTS, 0, data_size);
-    //     glBindVertexArray(0);
 
-    // }
+            Eigen::Matrix4f cur_state;
+            
+            c_trans.xyzrpy2t(g_pt_cld[data_id].state, &cur_state);
 
-    // glfwSwapBuffers(window);
-    // glfwPollEvents();        
+            model = eigen_mat4_to_glm_mat4(cur_state);
 
+            projection = glm::perspective(glm::radians(45.0f),
+                                            float(screenWidth)/float(screenHeight), 
+                                            0.1f, 
+                                            100.0f);
+
+            shader.setMat4("model", model);
+            shader.setMat4("view", view);
+            shader.setMat4("projection", projection);
+            
+            glBindVertexArray(VAO);
+            glPointSize(3.0);
+            glDrawArrays(GL_POINTS, 0, data_size);
+            glBindVertexArray(0);
+
+        }
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();        
+    }
 }
 
 void OpenglPointProcessing::terminate(){
@@ -296,23 +322,6 @@ void OpenglPointProcessing::clear_window(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
 }
 
-void OpenglPointProcessing::draw_points(Vertex v, GLfloat size){
-
-}
-
-
-void OpenglPointProcessing::draw_point_3d(PointCloud & pt_cld, GLfloat size){
-    for(int p_idx=0; p_idx < pt_cld.point_cloud.cols(); ++p_idx) {
-        Vertex v1 = {pt_cld.point_cloud(0,p_idx)/1000.0f,
-                     pt_cld.point_cloud(1,p_idx)/1000.0f,
-                     pt_cld.point_cloud(2,p_idx)/1000.0f,
-                     float(pt_cld.point_color(0,p_idx))/255.0f,
-                     float(pt_cld.point_color(1,p_idx))/255.0f,
-                     float(pt_cld.point_color(2,p_idx))/255.0f,
-                     1.0f};
-        draw_points(v1, size);
-    }
-};
 
 void OpenglPointProcessing::draw_axis(float line_length, float line_width){
     // glLineWidth(line_width);
@@ -330,4 +339,66 @@ void OpenglPointProcessing::draw_axis(float line_length, float line_width){
     // glVertex3f(0.0f, 0.0f, 0.0f);
     // glVertex3f(0.0f, 0.0f, line_length);
     // glEnd();
+}
+
+void OpenglPointProcessing::processInput_end(){
+    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+        glfwSetWindowShouldClose(window, true);
+    }
+
+    float currentFrame = glfwGetTime();
+    deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;
+
+    if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        camera->MovementSpeed = camera->FastSpeed;
+    } else {
+        camera->MovementSpeed = camera->OriginalSpeed;
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        camera->ProcessKeyboard(FORWARD, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
+        camera->ProcessKeyboard(BACKWARD, deltaTime);
+    }    
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        camera->ProcessKeyboard(LEFT, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        camera->ProcessKeyboard(RIGHT, deltaTime);
+    }    
+}
+
+void OpenglPointProcessing::mouse_callback(GLFWwindow * window, double xpos, double ypos) {
+
+    OpenglPointProcessing *ogl_pointer =
+         static_cast<OpenglPointProcessing*>(glfwGetWindowUserPointer(window));
+    ogl_pointer->mouse_callback_function(xpos, ypos);
+
+}
+
+void OpenglPointProcessing::scroll_callback(GLFWwindow * window, double xoffset, double yoffset) {
+    OpenglPointProcessing *ogl_pointer =
+         static_cast<OpenglPointProcessing*>(glfwGetWindowUserPointer(window));
+    ogl_pointer->scroll_callback_function(xoffset, yoffset);
+}
+
+void OpenglPointProcessing::mouse_callback_function(double xpos, double ypos) {
+    if(firstMouse) {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos-lastX;
+    float yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
+
+    camera->ProcessMouseMovement(xoffset, yoffset);
+}
+
+void OpenglPointProcessing::scroll_callback_function(double xoffset, double yoffset){
+    camera->ProcessMouseScroll(yoffset);
 }

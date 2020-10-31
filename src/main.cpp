@@ -60,13 +60,9 @@ int main(int argc, char** argv){
 
         global_cloud.push_back(ransac_point_3d);
 
-        // pt_cld_processing.show_pointcloud(pt_cld);
-
-        // pt_cld_processing.show_pointcloud(ransac_point_3d);
-        // ogl_pt_processing.plot_3d_points(ransac_point_3d);
         ogl_pt_processing.plot_global_points(global_cloud, ransac_point_3d.state, i);
-        
     }
+    ogl_pt_processing.draw_point_global(global_cloud, 3.0f);
     ogl_pt_processing.terminate();
     return 0;
 }
