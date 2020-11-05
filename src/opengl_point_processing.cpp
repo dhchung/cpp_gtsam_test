@@ -375,6 +375,7 @@ void OpenglPointProcessing::mouse_callback(GLFWwindow * window, double xpos, dou
     OpenglPointProcessing *ogl_pointer =
          static_cast<OpenglPointProcessing*>(glfwGetWindowUserPointer(window));
     ogl_pointer->mouse_callback_function(xpos, ypos);
+    std::cout<<"xpos : "<<xpos<<", ypos : "<<ypos<<std::endl;
 
 }
 
