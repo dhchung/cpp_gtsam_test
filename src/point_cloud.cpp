@@ -24,3 +24,8 @@ void PointCloud::input_gt_state(std::vector<float> & groundtruth_state){
     gt_state_exist = true;
     state = groundtruth_state;
 }
+
+
+void PointCloud::change_state(std::vector<float> & changed_state){
+    state = changed_state;
+}

@@ -12,8 +12,33 @@
 #include "dr_processing.h"
 #include "parameters.h"
 
+#include "math.h"
+#include "calculate_transformations.h"
+#include <vector>
 
-using std::thread;
+#include <gtsam/nonlinear/NonlinearFactorGraph.h>
+#include <gtsam/nonlinear/Values.h>
+#include <gtsam/inference/Symbol.h>
+#include <gtsam/slam/PriorFactor.h>
+#include <gtsam/slam/BetweenFactor.h>
+#include <gtsam/nonlinear/GaussNewtonOptimizer.h>
+
+#include <gtsam/slam/expressions.h>
+#include <gtsam/nonlinear/ExpressionFactorGraph.h>
+
+// Regular headers
+#include <gtsam/geometry/Pose3.h>
+#include <gtsam/nonlinear/Values.h>
+#include <gtsam/inference/Symbol.h>
+#include <gtsam/nonlinear/GaussNewtonOptimizer.h>
+#include <gtsam/nonlinear/LevenbergMarquardtOptimizer.h>
+#include <gtsam/nonlinear/Marginals.h>
+
+#include "state_plane.h"
+#include "planar_factor.h"
+#include "odom_factor.h"
+
+
 using namespace std;
 
 ImageProcessing img_proc;
