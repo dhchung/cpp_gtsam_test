@@ -16,7 +16,7 @@
 
 #include <string>
 #include <vector>
-#include "point_cloud.h"
+#include "pt_cloud.h"
 #include "shader.h"
 #include "calculate_transformations.h"
 #include "camera.h"

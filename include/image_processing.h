@@ -8,7 +8,7 @@
 #include <iostream>
 #include <Eigen/Dense>
 #include <algorithm>
-#include "point_cloud.h"
+#include "pt_cloud.h"
 #include <opencv2/core/eigen.hpp>
 #include "parameters.h"
 

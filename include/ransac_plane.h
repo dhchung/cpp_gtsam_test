@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <Eigen/Dense>
-#include "point_cloud.h"
+#include "pt_cloud.h"
 
 class RANSACPlane{
 public:

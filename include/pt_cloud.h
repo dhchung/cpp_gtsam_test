@@ -27,4 +27,6 @@ public:
     void input_rel_state(std::vector<float> & relative_state);
     void input_gt_state(std::vector<float> & groundtruth_state);
     void change_state(std::vector<float> & changed_state);
+
+    void estimate_plane_model();
 };
