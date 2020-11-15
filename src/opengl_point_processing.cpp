@@ -367,7 +367,9 @@ void OpenglPointProcessing::processInput_end(){
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         camera->ProcessKeyboard(RIGHT, deltaTime);
-    }    
+    }
+
+    std::cout<<"x : "<<camera->Position.x<< ", y : "<<camera->Position.y<<", z :"<<camera->Position.z<<std::endl;
 }
 
 void OpenglPointProcessing::mouse_callback(GLFWwindow * window, double xpos, double ypos) {

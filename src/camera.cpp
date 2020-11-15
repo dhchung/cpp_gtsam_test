@@ -9,7 +9,7 @@ Camera::Camera(glm::vec3 position,
                glm::vec3 up,
                float yaw, 
                float pitch):
-               Front(glm::vec3(0.0f, 0.0f, 1.0f)), 
+               Front(glm::vec3(1.0f, 0.0f, 0.0f)), 
                OriginalSpeed(SPEED), 
                MouseSensitivity(SENSITIVITY), 
                Zoom(ZOOM) {
@@ -30,7 +30,7 @@ Camera::Camera(float posX,
                float upZ,
                float yaw,
                float pitch):
-               Front(glm::vec3(0.0f, 0.0f, -1.0f)), 
+               Front(glm::vec3(1.0f, 0.0f, 0.0f)), 
                MovementSpeed(SPEED), 
                MouseSensitivity(SENSITIVITY), 
                Zoom(ZOOM){
@@ -110,6 +110,8 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constr
             Pitch = 89.0f * Pitch/fabs(Pitch);
         }
     }
+
+    std::cout<<"Pitch: "<<Pitch<<", Yaw: "<<Yaw<<std::endl;
     updateCameraVectors();
 }
 

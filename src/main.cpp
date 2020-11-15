@@ -110,7 +110,9 @@ int main(int argc, char** argv){
                                                                measure_noise_distance).finished());
 
     int initial_data_no = 120;
-    int final_data_no = data_num-6;
+    // int final_data_no = data_num-6;
+    int final_data_no = 300;
+
 
     for(int i = initial_data_no; i<final_data_no; ++i) {
 
