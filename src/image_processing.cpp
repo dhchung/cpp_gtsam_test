@@ -257,6 +257,6 @@ void ImageProcessing::show_matches(std::vector<cv::KeyPoint> &l_keypt,
                 r_keypt[pairs[1]].pt+Img_width_pt,
                 cv::Scalar(255,255,255));
     }
-    cv::imshow("Feature Matching", combined_img);
-    cv::waitKey(1);
+    // cv::imshow("Feature Matching", combined_img);
+    // cv::waitKey(1);
 }

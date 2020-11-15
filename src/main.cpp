@@ -114,6 +114,8 @@ int main(int argc, char** argv){
 
     for(int i = initial_data_no; i<final_data_no; ++i) {
 
+        std::cout<<"data : "<<i<<" out of "<<final_data_no<<std::endl;
+
         std::vector<float> cur_dr_state = dr_processing.nav_data[i];
         std::vector<float> rel_dr_prev_state = dr_processing.rel_nav_data[i-1];
 
@@ -122,7 +124,7 @@ int main(int argc, char** argv){
 
         img_proc.load_image(image_dir, i);
         img_proc.apply_clahe(4.0);
-        img_proc.show_image(img_proc.l_img, img_proc.r_img,1);
+        // img_proc.show_image(img_proc.l_img, img_proc.r_img,1);
         img_proc.match_stereo(cur_depth, &pt_cld);
 
         PointCloud ransac_point_3d;
