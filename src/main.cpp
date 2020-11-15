@@ -74,7 +74,7 @@ int main(int argc, char** argv){
     //gtsam
     gtsam::NonlinearFactorGraph graph;
     gtsam::Values initials;
-    int gtsam_idx = 1;
+    int gtsam_idx = 0;
     float odom_noise_translation = 100; //[mm]
     float odom_noise_angle = 2*M_PI/180.0f;
     float init_noise_translation = 10;
@@ -178,16 +178,7 @@ int main(int argc, char** argv){
 
             // Values results = LevenbergMarquardtOptimizer(graph, initials).optimize();
             
-            // for(int j = 1; j<gtsam_idx+2; ++j) {
-            //     std::vector<float> changed_state;
-            //     changed_state.resize(6);
-            //     for(int k = 1; k<6 ++k){
-            //         changed_state[k] = 
-            //     }
 
-
-            //     global_cloud[j-1].change_state()
-            // }
 
 
 
@@ -195,14 +186,23 @@ int main(int argc, char** argv){
         }
 
 
-        ogl_pt_processing.plot_global_points(global_cloud, ransac_point_3d.state, i);
+        // ogl_pt_processing.plot_global_points(global_cloud, ransac_point_3d.state, i);
     }
 
     gtsam::Values results = LevenbergMarquardtOptimizer(graph, initials).optimize();
     // results.print("Final Result:\n");
     
-    for(const gtsam::Values::ConstKeyValuePair& key_value: results){
-        
+    for(int i = 0; i < results.size(); ++i){
+        StatePlane optimized_result = results.at<StatePlane>(i);
+        std::vector<float> optimized_state;
+        optimized_state.push_back(optimized_result.x);
+        optimized_state.push_back(optimized_result.y);
+        optimized_state.push_back(optimized_result.z);
+        optimized_state.push_back(optimized_result.roll);
+        optimized_state.push_back(optimized_result.pitch);
+        optimized_state.push_back(optimized_result.yaw);
+
+        global_cloud[i].change_state(optimized_state);
     }
 
 
