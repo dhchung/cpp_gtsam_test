@@ -12,7 +12,7 @@ enum Camera_Movement{
     RIGHT
 };
 
-const float YAW = -180.0f;
+const float YAW = 0.0f;
 const float PITCH = 0.0f;
 const float SPEED = 2.5f;
 const float SENSITIVITY = 0.1f;
@@ -56,6 +56,7 @@ public:
 
     float Yaw;
     float Pitch;
+    float Defaultpitch;
     float OriginalSpeed;
     float FastSpeed;
     float MovementSpeed;

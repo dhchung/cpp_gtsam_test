@@ -75,12 +75,6 @@ int main(int argc, char** argv){
     gtsam::NonlinearFactorGraph graph;
     gtsam::Values initials;
     int gtsam_idx = 0;
-    float odom_noise_translation = 100; //[mm]
-    float odom_noise_angle = 2*M_PI/180.0f;
-    float init_noise_translation = 10;
-    float init_noise_angle = 1*M_PI/180.0f;
-    float measure_noise_normal = 0.01;
-    float measure_noise_distance = 5;
 
 
     gtsam::noiseModel::Diagonal::shared_ptr priorNoise = 
@@ -110,8 +104,8 @@ int main(int argc, char** argv){
                                                                measure_noise_distance).finished());
 
     int initial_data_no = 120;
-    // int final_data_no = data_num-6;
-    int final_data_no = 300;
+    int final_data_no = data_num-6;
+    // int final_data_no = 300;
 
 
     for(int i = initial_data_no; i<final_data_no; ++i) {
@@ -182,15 +176,24 @@ int main(int argc, char** argv){
 
             // Values results = LevenbergMarquardtOptimizer(graph, initials).optimize();
             
+            // for(int i = 0; i < results.size(); ++i){
+            //     StatePlane optimized_result = results.at<StatePlane>(i);
+            //     std::vector<float> optimized_state;
+            //     optimized_state.push_back(optimized_result.x);
+            //     optimized_state.push_back(optimized_result.y);
+            //     optimized_state.push_back(optimized_result.z);
+            //     optimized_state.push_back(optimized_result.roll);
+            //     optimized_state.push_back(optimized_result.pitch);
+            //     optimized_state.push_back(optimized_result.yaw);
 
-
-
+            //     global_cloud[i].change_state(optimized_state);
+            // }
 
             ++gtsam_idx;
         }
+        ogl_pt_processing.insertImages(img_proc.l_img);
 
-
-        // ogl_pt_processing.plot_global_points(global_cloud, ransac_point_3d.state, i);
+        ogl_pt_processing.plot_global_points(global_cloud, ransac_point_3d.state, i);
     }
 
     gtsam::Values results = LevenbergMarquardtOptimizer(graph, initials).optimize();

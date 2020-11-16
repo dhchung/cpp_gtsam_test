@@ -2,7 +2,7 @@
 #include <iostream>
 
 Camera::Camera(){
-
+    Defaultpitch = 90.0;
 }
 
 Camera::Camera(glm::vec3 position,
@@ -19,6 +19,7 @@ Camera::Camera(glm::vec3 position,
     Pitch = pitch;
     MovementSpeed = OriginalSpeed;
     FastSpeed = OriginalSpeed*5;
+    Defaultpitch = 90.0f;
     updateCameraVectors();
 }
 
@@ -38,6 +39,7 @@ Camera::Camera(float posX,
     WorldUp = glm::vec3(upX, upY, upZ);
     Yaw = yaw;
     Pitch = pitch;
+    Defaultpitch = 90.0f;
     updateCameraVectors();
 }
 
@@ -83,17 +85,17 @@ void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime) {
 void Camera::ProcessInput(float dx, float dy, float dz,
                           float droll = 0.0f, float dpitch = 0.0f, float dyaw = 0.0f) {
 
-    glm::vec4 temp(Position.x, Position.y, Position.z, 1.0f);
-    glm::mat4 trans(1.0f);
-    trans = glm::rotate(trans, glm::radians(droll), glm::vec3(0.0f, 0.0f, 1.0f));
-    trans = glm::rotate(trans, glm::radians(dpitch), glm::vec3(1.0f, 0.0f, 0.0f));
-    trans = glm::rotate(trans, glm::radians(dyaw), glm::vec3(0.0f, 1.0f, 0.0f));
-    trans = glm::translate(trans, glm::vec3(dx, dy, dz));
-    // trans = glm::inverse(trans);
-    temp = trans*temp;
-    Position.x = temp.x;
-    Position.y = temp.y;
-    Position.z = temp.z;
+    // glm::vec4 temp(Position.x, Position.y, Position.z, 1.0f);
+    // glm::mat4 trans(1.0f);
+    // trans = glm::rotate(trans, glm::radians(droll), glm::vec3(0.0f, 0.0f, 1.0f));
+    // trans = glm::rotate(trans, glm::radians(dpitch), glm::vec3(1.0f, 0.0f, 0.0f));
+    // trans = glm::rotate(trans, glm::radians(dyaw), glm::vec3(0.0f, 1.0f, 0.0f));
+    // trans = glm::translate(trans, glm::vec3(dx, dy, dz));
+    // // trans = glm::inverse(trans);
+    // temp = trans*temp;
+    // Position.x = temp.x;
+    // Position.y = temp.y;
+    // Position.z = temp.z;
 
 }
 
@@ -128,11 +130,11 @@ void Camera::ProcessMouseScroll(float yoffset) {
 }
 
 void Camera::updateCameraVectors() {
-    glm::vec4 rel_pos_R(0.0, 0.0, 1.0, 1.0);
+    glm::vec4 rel_pos_R(1.0, 0.0, 0.0, 1.0);
     glm::mat4 trans(1.0);
     // trans = glm::translate(trans, glm::vec3(1.0f, 0.0f, 0.0f));
-    trans = glm::rotate(trans, glm::radians(Pitch), glm::vec3(0.0, 1.0, 0.0));
     trans = glm::rotate(trans, glm::radians(Yaw), glm::vec3(0.0, 0.0, 1.0));
+    trans = glm::rotate(trans, glm::radians(-Pitch), glm::vec3(0.0, 1.0, 0.0));
     glm::vec4 temp(1.0f);
     temp = trans*rel_pos_R;
 
