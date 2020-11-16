@@ -20,10 +20,14 @@
 #include "calculate_transformations.h"
 #include "camera.h"
 
+
 #include <opencv2/imgproc.hpp>
 #include <gtsam/base/Matrix.h>
 #include <gtsam/base/Vector.h>
 #include <gtsam/nonlinear/Values.h>
+#include "state_plane.h"
+
+#include "parameters.h"
 
 class OpenglPointProcessing{
 
@@ -37,7 +41,7 @@ public:
     ~OpenglPointProcessing();
 
     Shader shader;
-    unsigned int VBO, VAO;
+    unsigned int VBO, VAO, EBO;
 
     std::string w_name;
 

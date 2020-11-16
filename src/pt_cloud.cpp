@@ -42,6 +42,12 @@ void PointCloud::estimate_plane_model(){
     Eigen::Vector3f normal = svd.matrixU().col(2);
 
     float d = -normal.transpose()*mean;
+
+    if(d < 0){
+        d = -d;
+        normal = -normal;
+    }
+
     
     plane_model.segment(0,3) = normal;
     plane_model(3) = d;

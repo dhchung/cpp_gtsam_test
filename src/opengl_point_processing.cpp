@@ -61,6 +61,7 @@ void OpenglPointProcessing::init_opengl(){
     // glUseProgram(l_programId);
 
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
     glGenVertexArrays(1, &VAO);
     glEnable(GL_DEPTH_TEST);  
 
@@ -414,6 +415,7 @@ void OpenglPointProcessing::insertImages(cv::Mat & img){
 
 
 void OpenglPointProcessing::draw_plane_global(gtsam::Values & results){
+
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -433,24 +435,65 @@ void OpenglPointProcessing::draw_plane_global(gtsam::Values & results){
 
 
 
-        for(int data_id = 0; data_id<g_pt_cld.size(); ++data_id){
+        for(int data_id = 0; results.size(); ++data_id){
 
-            int data_size = g_pt_cld[data_id].point_cloud.cols();
+            gtsamexample::StatePlane state = results.at<gtsamexample::StatePlane>(data_id);
 
-            float vertices[6*data_size];
-        
-            for(int i = 0; i<data_size; ++i){
-                for(int j = 0; j<3; ++j){
-                    vertices[i*6+j] = g_pt_cld[data_id].point_cloud(j,i)/1000.0f;
-                }
-                for(int j = 3; j<6; ++j){
-                    vertices[i*6+j] = g_pt_cld[data_id].point_color(j-3,i)/255.0f;
-                }
-            }
+            Eigen::Vector3f line_0(focal_length, -img_center_x, -img_center_y);
+            Eigen::Vector3f line_1(focal_length, img_center_x, -img_center_y);
+            Eigen::Vector3f line_2(focal_length, -img_center_x, img_center_y);
+            Eigen::Vector3f line_3(focal_length, img_center_x, img_center_y);
+            Eigen::Vector4f plane_param = Eigen::Vector4f(state.nx, state.ny, state.nz, state.d);
+
+            Eigen::Vector3f loc_0 = line_0 * (-state.d/(line_0.transpose()*plane_param.segment(0,2)));
+            Eigen::Vector3f loc_1 = line_1 * (-state.d/(line_1.transpose()*plane_param.segment(0,2)));
+            Eigen::Vector3f loc_2 = line_2 * (-state.d/(line_2.transpose()*plane_param.segment(0,2)));
+            Eigen::Vector3f loc_3 = line_3 * (-state.d/(line_3.transpose()*plane_param.segment(0,2)));
+
+            int height = imgs[data_id].rows;
+            int width = imgs[data_id].cols;
+            cv::Mat img;
+            cv::cvtColor(imgs[data_id], img, cv::COLOR_BGR2RGB);
+            cv::flip(img, img, -1);
+            unsigned char* image = img.data;
+
+            float vertices[] = {
+                //Position                              //TexCoord
+                loc_0(0),   loc_0(1),   loc_0(2),       0.0f,   1.0f,
+                loc_1(0),   loc_1(1),   loc_1(2),       1.0f,   1.0f,
+                loc_2(0),   loc_2(1),   loc_2(2),       0.0f,   0.0f,
+                loc_3(0),   loc_3(1),   loc_3(2),       1.0f,   0.0f
+            };
+
+            unsigned int indices[] = {
+                0,  1,  2,
+                1,  2,  3
+            };
 
             glBindVertexArray(VAO);
             glBindBuffer(GL_ARRAY_BUFFER, VBO);
             glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices, GL_STATIC_DRAW);
+
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)0);
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(3*sizeof(float)));
+            glEnableVertexAttribArray(0);
+            glEnableVertexAttribArray(1);
+
+            unsigned int texture;
+            glGenTextures(1, &texture);
+            glBindTexture(GL_TEXTURE_2D, texture);
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+            if(image){
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+            }
+
 
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
             glEnableVertexAttribArray(0);
