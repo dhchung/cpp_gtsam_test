@@ -72,7 +72,7 @@ Vector OdomFactor::evaluateError(const StatePlane& sp1, const StatePlane & sp2,
 
 Matrix OdomFactor::rollMatrix(float roll, bool jacobian) const{
 
-    Matrix result = zeros(3,3);
+    Matrix result = Matrix::Zero(3,3);
     if(!jacobian){
         result(0,0) = 1.0;
         result(1,1) = cos(roll);
@@ -89,7 +89,7 @@ Matrix OdomFactor::rollMatrix(float roll, bool jacobian) const{
 }
 
 Matrix OdomFactor::pitchMatrix(float pitch, bool jacobian) const{
-    Matrix result = zeros(3,3);
+    Matrix result = Matrix::Zero(3,3);
     if(!jacobian){
         result(0,0) = cos(pitch);
         result(0,2) = sin(pitch);
@@ -106,7 +106,7 @@ Matrix OdomFactor::pitchMatrix(float pitch, bool jacobian) const{
 }
 
 Matrix OdomFactor::yawMatrix(float yaw, bool jacobian) const{
-    Matrix result = zeros(3,3);
+    Matrix result = Matrix::Zero(3,3);
     if(!jacobian){
         result(0,0) = cos(yaw);
         result(0,1) = -sin(yaw);
@@ -123,29 +123,29 @@ Matrix OdomFactor::yawMatrix(float yaw, bool jacobian) const{
 }
 
 Matrix OdomFactor::rotationMatrix(float roll, float pitch, float yaw) const{
-    Matrix result = zeros(3,3);
+    Matrix result = Matrix::Zero(3,3);
     result = yawMatrix(yaw)*pitchMatrix(pitch)*rollMatrix(roll);
     return result;
 }
 
 Matrix OdomFactor::rollJacobiMatrix(float roll, float pitch, float yaw) const{
-    Matrix result = zeros(3,3);
+    Matrix result = Matrix::Zero(3,3);
     result = yawMatrix(yaw)*pitchMatrix(pitch)*rollMatrix(roll, true);
     return result;
 }
 Matrix OdomFactor::pitchJacobiMatrix(float roll, float pitch, float yaw) const{
-    Matrix result = zeros(3,3);
+    Matrix result = Matrix::Zero(3,3);
     result = yawMatrix(yaw)*pitchMatrix(pitch, true)*rollMatrix(roll);
     return result;
 }
 Matrix OdomFactor::yawJacobiMatrix(float roll, float pitch, float yaw) const{
-    Matrix result = zeros(3,3);
+    Matrix result = Matrix::Zero(3,3);
     result = yawMatrix(yaw, true)*pitchMatrix(pitch)*rollMatrix(roll);
     return result;
 }
 
 Matrix OdomFactor::globalToInertial(float roll, float pitch, float yaw) const{
-    Matrix result = zeros(3,3);
+    Matrix result = Matrix::Zero(3,3);
     result(0,0) = 1.0;
     result(0,2) = -sin(pitch);
     result(1,1) = cos(roll);
@@ -156,7 +156,7 @@ Matrix OdomFactor::globalToInertial(float roll, float pitch, float yaw) const{
 }
 
 Matrix OdomFactor::rollJacobiGlobalToInertial(float roll, float pitch, float yaw) const{
-    Matrix result = zeros(3,3);
+    Matrix result = Matrix::Zero(3,3);
     result(1,1) = -sin(roll);
     result(1,2) = cos(roll)*cos(pitch);
     result(2,1) = -cos(roll);
@@ -164,13 +164,13 @@ Matrix OdomFactor::rollJacobiGlobalToInertial(float roll, float pitch, float yaw
     return result;
 }
 Matrix OdomFactor::pitchJacobiGlobalToInertial(float roll, float pitch, float yaw) const{
-    Matrix result = zeros(3,3);
+    Matrix result = Matrix::Zero(3,3);
     result(0,2) = -cos(pitch);
     result(1,2) = -sin(roll)*sin(pitch);
     result(2,2) = -cos(roll)*sin(pitch);
     return result;
 }
 Matrix OdomFactor::yawJacobiGlobalToInertial(float roll, float pitch, float yaw) const{
-    Matrix result = zeros(3,3); 
+    Matrix result = Matrix::Zero(3,3); 
     return result;  
 }

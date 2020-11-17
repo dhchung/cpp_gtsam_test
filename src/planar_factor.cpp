@@ -75,7 +75,7 @@ Vector PlanarFactor::evaluateError(const StatePlane& sp1, const StatePlane & sp2
 
 Matrix PlanarFactor::rollMatrix(float roll, bool jacobian) const{
 
-    Matrix result = zeros(3,3);
+    Matrix result = Matrix::Zero(3,3);
     if(!jacobian){
         result(0,0) = 1.0;
         result(1,1) = cos(roll);
@@ -92,7 +92,7 @@ Matrix PlanarFactor::rollMatrix(float roll, bool jacobian) const{
 }
 
 Matrix PlanarFactor::pitchMatrix(float pitch, bool jacobian) const{
-    Matrix result = zeros(3,3);
+    Matrix result = Matrix::Zero(3,3);
     if(!jacobian){
         result(0,0) = cos(pitch);
         result(0,2) = sin(pitch);
@@ -109,7 +109,7 @@ Matrix PlanarFactor::pitchMatrix(float pitch, bool jacobian) const{
 }
 
 Matrix PlanarFactor::yawMatrix(float yaw, bool jacobian) const{
-    Matrix result = zeros(3,3);
+    Matrix result = Matrix::Zero(3,3);
     if(!jacobian){
         result(0,0) = cos(yaw);
         result(0,1) = -sin(yaw);
@@ -126,23 +126,23 @@ Matrix PlanarFactor::yawMatrix(float yaw, bool jacobian) const{
 }
 
 Matrix PlanarFactor::rotationMatrix(float roll, float pitch, float yaw) const{
-    Matrix result = zeros(3,3);
+    Matrix result = Matrix::Zero(3,3);
     result = yawMatrix(yaw)*pitchMatrix(pitch)*rollMatrix(roll);
     return result;
 }
 
 Matrix PlanarFactor::rollJacobiMatrix(float roll, float pitch, float yaw) const{
-    Matrix result = zeros(3,3);
+    Matrix result = Matrix::Zero(3,3);
     result = yawMatrix(yaw)*pitchMatrix(pitch)*rollMatrix(roll, true);
     return result;
 }
 Matrix PlanarFactor::pitchJacobiMatrix(float roll, float pitch, float yaw) const{
-    Matrix result = zeros(3,3);
+    Matrix result = Matrix::Zero(3,3);
     result = yawMatrix(yaw)*pitchMatrix(pitch, true)*rollMatrix(roll);
     return result;
 }
 Matrix PlanarFactor::yawJacobiMatrix(float roll, float pitch, float yaw) const{
-    Matrix result = zeros(3,3);
+    Matrix result = Matrix::Zero(3,3);
     result = yawMatrix(yaw, true)*pitchMatrix(pitch)*rollMatrix(roll);
     return result;
 }
