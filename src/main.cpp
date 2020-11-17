@@ -130,7 +130,6 @@ int main(int argc, char** argv){
         ransac_point_3d.input_gt_state(cur_dr_state);
         ransac_point_3d.input_rel_state(rel_dr_prev_state);
 
-        global_cloud.push_back(ransac_point_3d);
 
         if(i==initial_data_no){
             //let's start from nav_data[i] and its measurements
@@ -148,15 +147,20 @@ int main(int argc, char** argv){
 
             graph.add(gtsam::PriorFactor<gtsamexample::StatePlane>(gtsam_idx, init_sp_state, priorNoise));
             initials.insert(gtsam_idx, init_sp_state);
+            ogl_pt_processing.insertImages(img_proc.l_img);
+            global_cloud.push_back(ransac_point_3d);
+
             
         }else{
             gtsam::Vector6 rel_odom = tools.turnVectorToGTSAMVector(rel_dr_prev_state);
             graph.add(boost::make_shared<OdomFactor>(gtsam_idx, gtsam_idx+1, rel_odom, odomNoise));
             gtsam::Vector4 measurement;
-            measurement(0) = double(ransac_point_3d.plane_model(0));
+            measurement(0) = ransac_point_3d.plane_model(0);
             measurement(1) = ransac_point_3d.plane_model(1);
             measurement(2) = ransac_point_3d.plane_model(2);
             measurement(3) = ransac_point_3d.plane_model(3);
+
+            StatePlane prev_state = initials.at<StatePlane>
 
             graph.add(boost::make_shared<PlanarFactor>(gtsam_idx, gtsam_idx+1, measurement, measNoise));
 
@@ -176,8 +180,8 @@ int main(int argc, char** argv){
 
             // Values results = LevenbergMarquardtOptimizer(graph, initials).optimize();
             
-            // for(int i = 0; i < results.size(); ++i){
-            //     StatePlane optimized_result = results.at<StatePlane>(i);
+            // for(int j = 0; j < results.size(); ++j){
+            //     StatePlane optimized_result = results.at<StatePlane>(j);
             //     std::vector<float> optimized_state;
             //     optimized_state.push_back(optimized_result.x);
             //     optimized_state.push_back(optimized_result.y);
@@ -186,12 +190,14 @@ int main(int argc, char** argv){
             //     optimized_state.push_back(optimized_result.pitch);
             //     optimized_state.push_back(optimized_result.yaw);
 
-            //     global_cloud[i].change_state(optimized_state);
+            //     global_cloud[j].change_state(optimized_state);
             // }
 
             ++gtsam_idx;
+            ogl_pt_processing.insertImages(img_proc.l_img);
+            global_cloud.push_back(ransac_point_3d);
+
         }
-        ogl_pt_processing.insertImages(img_proc.l_img);
 
         ogl_pt_processing.plot_global_points(global_cloud, ransac_point_3d.state, i);
     }
@@ -213,10 +219,9 @@ int main(int argc, char** argv){
     }
 
 
-    // gtsamexample::StatePlane a = results.at(1);
-    // results.at(1).
-
-    ogl_pt_processing.draw_point_global(global_cloud, 3.0f);
+    // ogl_pt_processing.draw_plane_global(results);
+    ogl_pt_processing.draw_plane_global_wo_texture(results);
+    // ogl_pt_processing.draw_point_global(global_cloud, 3.0f);
     ogl_pt_processing.terminate();
     return 0;
 }

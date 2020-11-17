@@ -51,7 +51,8 @@ void OpenglPointProcessing::init_opengl(){
         std::cout<< "Failed to initialize GLAD" << std::endl;
     }
 
-    shader.InitShader("shaders/vertex_shader.vs", "shaders/fragment_shader.fs");
+    point_shader.InitShader("shaders/point/vertex_shader.vs", "shaders/point/fragment_shader.fs");
+    plane_shader.InitShader("shaders/plane/with_texture/vertex_shader.vs", "shaders/plane/with_texture/fragment_shader.fs");
 
     // glDisable(GL_DEPTH_TEST);
     // glEnable(GL_BLEND);
@@ -123,10 +124,10 @@ void OpenglPointProcessing::plot_3d_points(PointCloud & pt_cld){
                        glm::vec3(0.0f, 0.0f, -1.0f));
 
     clear_window();
-    shader.use();
-    shader.setMat4("model", model);
-    shader.setMat4("view", view);
-    shader.setMat4("projection", projection);
+    point_shader.use();
+    point_shader.setMat4("model", model);
+    point_shader.setMat4("view", view);
+    point_shader.setMat4("projection", projection);
     
     glBindVertexArray(VAO);
     glPointSize(3.0);
@@ -210,10 +211,10 @@ void OpenglPointProcessing::plot_global_points(std::vector<PointCloud> & g_pt_cl
 
 
 
-        shader.use();
-        shader.setMat4("model", model);
-        shader.setMat4("view", view);
-        shader.setMat4("projection", projection);
+        point_shader.use();
+        point_shader.setMat4("model", model);
+        point_shader.setMat4("view", view);
+        point_shader.setMat4("projection", projection);
         
         glBindVertexArray(VAO);
         glPointSize(3.0);
@@ -250,7 +251,7 @@ void OpenglPointProcessing::draw_point_global(std::vector<PointCloud> & g_pt_cld
         glm::mat4 view = glm::mat4(1.0f);
         glm::mat4 projection = glm::mat4(1.0f);
 
-        shader.use();
+        point_shader.use();
         projection = glm::perspective(glm::radians(camera->Zoom), (float)screenWidth/2/(float)screenHeight, 0.1f, 100.0f);
         view = camera->GetViewMatrix();
 
@@ -299,9 +300,10 @@ void OpenglPointProcessing::draw_point_global(std::vector<PointCloud> & g_pt_cld
                                             0.1f, 
                                             100.0f);
 
-            shader.setMat4("model", model);
-            shader.setMat4("view", view);
-            shader.setMat4("projection", projection);
+            point_shader.setMat4("model", model);
+            point_shader.setMat4("view", view);
+            point_shader.setMat4("projection", projection);
+            point_shader.setBool("use_texture_in", false);
             
             glBindVertexArray(VAO);
             glPointSize(3.0);
@@ -409,7 +411,10 @@ void OpenglPointProcessing::scroll_callback_function(double xoffset, double yoff
 
 
 void OpenglPointProcessing::insertImages(cv::Mat & img){
-    imgs.push_back(img);
+    cv::Mat img_temp;
+    cv::cvtColor(img, img_temp, cv::COLOR_BGR2RGB);
+    cv::flip(img_temp, img_temp, -1);
+    imgs.push_back(img_temp);
     std::cout<<"Image is pushed back : "<<static_cast<int>(imgs.size())<<"imgs"<<std::endl;
 }
 
@@ -420,6 +425,31 @@ void OpenglPointProcessing::draw_plane_global(gtsam::Values & results){
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+    std::vector<Eigen::Vector3f> loc_0, loc_1, loc_2, loc_3;
+    loc_0.resize(results.size());
+    loc_1.resize(results.size());
+    loc_2.resize(results.size());
+    loc_3.resize(results.size());
+    std::vector<gtsamexample::StatePlane> state;
+    state.resize(results.size());
+
+    for(int data_id = 0; data_id < results.size(); ++data_id){
+        state[data_id] = results.at<gtsamexample::StatePlane>(data_id);
+
+        Eigen::Vector3f line_0(focal_length, -img_center_x, -img_center_y);
+        Eigen::Vector3f line_1(focal_length, img_center_x, -img_center_y);
+        Eigen::Vector3f line_2(focal_length, -img_center_x, img_center_y);
+        Eigen::Vector3f line_3(focal_length, img_center_x, img_center_y);
+        Eigen::Vector4f plane_param = Eigen::Vector4f(state[data_id].nx, state[data_id].ny, state[data_id].nz, state[data_id].d);
+
+        loc_0[data_id] = line_0 * (-state[data_id].d/(line_0.transpose()*plane_param.segment(0,2)))/1000.0f;
+        loc_1[data_id] = line_1 * (-state[data_id].d/(line_1.transpose()*plane_param.segment(0,2)))/1000.0f;
+        loc_2[data_id] = line_2 * (-state[data_id].d/(line_2.transpose()*plane_param.segment(0,2)))/1000.0f;
+        loc_3[data_id] = line_3 * (-state[data_id].d/(line_3.transpose()*plane_param.segment(0,2)))/1000.0f;
+    }
+
+    plane_shader.use();
+
     while(!glfwWindowShouldClose(window)){
         processInput_end();
         glClearColor(28.0/255.0, 40.0/255.0, 79.0/255.0, 1.0f);
@@ -429,40 +459,20 @@ void OpenglPointProcessing::draw_plane_global(gtsam::Values & results){
         glm::mat4 view = glm::mat4(1.0f);
         glm::mat4 projection = glm::mat4(1.0f);
 
-        shader.use();
         projection = glm::perspective(glm::radians(camera->Zoom), (float)screenWidth/2/(float)screenHeight, 0.1f, 100.0f);
         view = camera->GetViewMatrix();
 
-
-
-        for(int data_id = 0; results.size(); ++data_id){
-
-            gtsamexample::StatePlane state = results.at<gtsamexample::StatePlane>(data_id);
-
-            Eigen::Vector3f line_0(focal_length, -img_center_x, -img_center_y);
-            Eigen::Vector3f line_1(focal_length, img_center_x, -img_center_y);
-            Eigen::Vector3f line_2(focal_length, -img_center_x, img_center_y);
-            Eigen::Vector3f line_3(focal_length, img_center_x, img_center_y);
-            Eigen::Vector4f plane_param = Eigen::Vector4f(state.nx, state.ny, state.nz, state.d);
-
-            Eigen::Vector3f loc_0 = line_0 * (-state.d/(line_0.transpose()*plane_param.segment(0,2)));
-            Eigen::Vector3f loc_1 = line_1 * (-state.d/(line_1.transpose()*plane_param.segment(0,2)));
-            Eigen::Vector3f loc_2 = line_2 * (-state.d/(line_2.transpose()*plane_param.segment(0,2)));
-            Eigen::Vector3f loc_3 = line_3 * (-state.d/(line_3.transpose()*plane_param.segment(0,2)));
+        for(int data_id = 0; data_id < results.size(); ++data_id){
 
             int height = imgs[data_id].rows;
             int width = imgs[data_id].cols;
-            cv::Mat img;
-            cv::cvtColor(imgs[data_id], img, cv::COLOR_BGR2RGB);
-            cv::flip(img, img, -1);
-            unsigned char* image = img.data;
 
             float vertices[] = {
-                //Position                              //TexCoord
-                loc_0(0),   loc_0(1),   loc_0(2),       0.0f,   1.0f,
-                loc_1(0),   loc_1(1),   loc_1(2),       1.0f,   1.0f,
-                loc_2(0),   loc_2(1),   loc_2(2),       0.0f,   0.0f,
-                loc_3(0),   loc_3(1),   loc_3(2),       1.0f,   0.0f
+                //Position                                                          //TexCoord
+                loc_0[data_id](0),   loc_0[data_id](1),   loc_0[data_id](2),       0.0f,   1.0f,
+                loc_1[data_id](0),   loc_1[data_id](1),   loc_1[data_id](2),       1.0f,   1.0f,
+                loc_2[data_id](0),   loc_2[data_id](1),   loc_2[data_id](2),       0.0f,   0.0f,
+                loc_3[data_id](0),   loc_3[data_id](1),   loc_3[data_id](2),       1.0f,   0.0f
             };
 
             unsigned int indices[] = {
@@ -490,27 +500,14 @@ void OpenglPointProcessing::draw_plane_global(gtsam::Values & results){
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-            if(image){
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+            if(imgs[data_id].data){
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imgs[data_id].data);
             }
 
-
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
-            glEnableVertexAttribArray(0);
-
-            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
-            glEnableVertexAttribArray(1);
-
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-            glBindVertexArray(0);
-
-
             //Model and camera;
-
-
             Eigen::Matrix4f cur_state;
             
-            c_trans.xyzrpy2t(g_pt_cld[data_id].state, &cur_state);
+            c_trans.xyzrpy2t(state[data_id].x, state[data_id].y, state[data_id].z, state[data_id].roll, state[data_id].pitch, state[data_id].yaw , &cur_state);
 
             model = eigen_mat4_to_glm_mat4(cur_state);
 
@@ -519,15 +516,112 @@ void OpenglPointProcessing::draw_plane_global(gtsam::Values & results){
                                             0.1f, 
                                             100.0f);
 
-            shader.setMat4("model", model);
-            shader.setMat4("view", view);
-            shader.setMat4("projection", projection);
-            
-            glBindVertexArray(VAO);
-            glPointSize(3.0);
-            glDrawArrays(GL_POINTS, 0, data_size);
-            glBindVertexArray(0);
+            plane_shader.setMat4("model", model);
+            plane_shader.setMat4("view", view);
+            plane_shader.setMat4("projection", projection);
 
+
+            glBindVertexArray(VAO);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        }
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();        
+    }
+}
+
+
+void OpenglPointProcessing::draw_plane_global_wo_texture(gtsam::Values & results){
+
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    std::vector<Eigen::Vector3f> loc_0, loc_1, loc_2, loc_3;
+    loc_0.resize(results.size());
+    loc_1.resize(results.size());
+    loc_2.resize(results.size());
+    loc_3.resize(results.size());
+    std::vector<gtsamexample::StatePlane> state;
+    state.resize(results.size());
+
+    for(int data_id = 0; data_id < results.size(); ++data_id){
+        state[data_id] = results.at<gtsamexample::StatePlane>(data_id);
+
+        Eigen::Vector3f line_0(focal_length, -img_center_x, -img_center_y);
+        Eigen::Vector3f line_1(focal_length, img_center_x, -img_center_y);
+        Eigen::Vector3f line_2(focal_length, -img_center_x, img_center_y);
+        Eigen::Vector3f line_3(focal_length, img_center_x, img_center_y);
+        Eigen::Vector4f plane_param = Eigen::Vector4f(state[data_id].nx, state[data_id].ny, state[data_id].nz, state[data_id].d);
+
+        loc_0[data_id] = line_0 * (-state[data_id].d/(line_0.transpose()*plane_param.segment(0,2)))/1000.0f;
+        loc_1[data_id] = line_1 * (-state[data_id].d/(line_1.transpose()*plane_param.segment(0,2)))/1000.0f;
+        loc_2[data_id] = line_2 * (-state[data_id].d/(line_2.transpose()*plane_param.segment(0,2)))/1000.0f;
+        loc_3[data_id] = line_3 * (-state[data_id].d/(line_3.transpose()*plane_param.segment(0,2)))/1000.0f;
+    }
+
+    point_shader.use();
+
+    while(!glfwWindowShouldClose(window)){
+        processInput_end();
+        glClearColor(28.0/255.0, 40.0/255.0, 79.0/255.0, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
+
+        glm::mat4 model = glm::mat4(1.0f);
+        glm::mat4 view = glm::mat4(1.0f);
+        glm::mat4 projection = glm::mat4(1.0f);
+
+        projection = glm::perspective(glm::radians(camera->Zoom), (float)screenWidth/2/(float)screenHeight, 0.1f, 100.0f);
+        view = camera->GetViewMatrix();
+
+        for(int data_id = 0; data_id < results.size(); ++data_id){
+
+            int height = imgs[data_id].rows;
+            int width = imgs[data_id].cols;
+
+            float vertices[] = {
+                //Position                                                          //Colors
+                loc_0[data_id](0),   loc_0[data_id](1),   loc_0[data_id](2),       0.5f,   0.5f,    0.5f,
+                loc_1[data_id](0),   loc_1[data_id](1),   loc_1[data_id](2),       0.5f,   0.5f,    0.5f,
+                loc_2[data_id](0),   loc_2[data_id](1),   loc_2[data_id](2),       0.5f,   0.5f,    0.5f,
+                loc_3[data_id](0),   loc_3[data_id](1),   loc_3[data_id](2),       0.5f,   0.5f,    0.5f
+            };
+
+            unsigned int indices[] = {
+                0,  1,  2,
+                1,  2,  3
+            };
+
+            glBindVertexArray(VAO);
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices, GL_STATIC_DRAW);
+
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
+            glEnableVertexAttribArray(0);
+
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+            glEnableVertexAttribArray(1);
+
+            //Model and camera;
+            Eigen::Matrix4f cur_state;
+            
+            c_trans.xyzrpy2t(state[data_id].x, state[data_id].y, state[data_id].z, state[data_id].roll, state[data_id].pitch, state[data_id].yaw , &cur_state);
+
+            model = eigen_mat4_to_glm_mat4(cur_state);
+
+            projection = glm::perspective(glm::radians(45.0f),
+                                            float(screenWidth)/float(screenHeight), 
+                                            0.1f, 
+                                            100.0f);
+
+            point_shader.setMat4("model", model);
+            point_shader.setMat4("view", view);
+            point_shader.setMat4("projection", projection);
+
+            glBindVertexArray(VAO);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         }
 
         glfwSwapBuffers(window);

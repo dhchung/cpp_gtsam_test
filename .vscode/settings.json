@@ -62,7 +62,8 @@
         "string_view": "cpp",
         "csignal": "cpp",
         "valarray": "cpp",
-        "dense": "cpp"
+        "dense": "cpp",
+        "*.ipp": "cpp"
     },
     "C_Cpp.errorSquiggles": "Enabled"
 }

@@ -21,7 +21,4 @@ public:
                            std::vector<float> & state_2, 
                            std::vector<float> * rel_pose1_2);
     void load_dr(std::string & filedir, int & data_num);
-
-    void test(std::vector<float> a);
-
 };

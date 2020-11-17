@@ -40,7 +40,9 @@ public:
     OpenglPointProcessing(std::string window_name);
     ~OpenglPointProcessing();
 
-    Shader shader;
+    Shader point_shader;
+    Shader plane_shader;
+    
     unsigned int VBO, VAO, EBO;
 
     std::string w_name;
@@ -96,5 +98,5 @@ public:
     void insertImages(cv::Mat & img);
 
     void draw_plane_global(gtsam::Values & results);
-
+    void draw_plane_global_wo_texture(gtsam::Values & results);
 };

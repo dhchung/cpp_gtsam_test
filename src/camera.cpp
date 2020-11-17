@@ -113,7 +113,7 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, GLboolean constr
         }
     }
 
-    std::cout<<"Pitch: "<<Pitch<<", Yaw: "<<Yaw<<std::endl;
+    // std::cout<<"Pitch: "<<Pitch<<", Yaw: "<<Yaw<<std::endl;
     updateCameraVectors();
 }
 

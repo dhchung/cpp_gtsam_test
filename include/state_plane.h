@@ -25,6 +25,8 @@ namespace gtsamexample{
                x(xi), y(yi), z(zi),
                roll(rolli), pitch(pitchi), yaw(yawi),
                nx(nxi), ny(nyi), nz(nz1), d(di){}
+    StatePlane(){}
+
     };
 }
 

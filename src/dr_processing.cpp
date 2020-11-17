@@ -23,12 +23,6 @@ void DrProcessing::get_relative_pose(std::vector<float> & state_1,
 
 }
 
-void DrProcessing::test(std::vector<float> a){
-    for(int i = 0; i<a.size(); ++i){
-        std::cout<<a[i]<<"\t";
-    }
-    std::cout<<std::endl;
-}
 
 void DrProcessing::load_dr(std::string & filedir, int & data_num){
     std::ifstream infile(filedir+"/navigation_log_file.txt");
