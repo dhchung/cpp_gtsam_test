@@ -99,4 +99,7 @@ public:
 
     void draw_plane_global(gtsam::Values & results);
     void draw_plane_global_wo_texture(gtsam::Values & results);
+    void draw_surfels(gtsam::Values & results);
+
+
 };

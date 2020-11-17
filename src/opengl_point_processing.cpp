@@ -628,3 +628,101 @@ void OpenglPointProcessing::draw_plane_global_wo_texture(gtsam::Values & results
         glfwPollEvents();        
     }
 }
+
+
+void OpenglPointProcessing::draw_surfels(gtsam::Values & results){
+
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    std::vector<Eigen::Vector3f> loc_0, loc_1, loc_2, loc_3;
+    loc_0.resize(results.size());
+    loc_1.resize(results.size());
+    loc_2.resize(results.size());
+    loc_3.resize(results.size());
+    std::vector<gtsamexample::StatePlane> state;
+    state.resize(results.size());
+
+
+    float vertices[6*180];
+
+    for(int i = 0; i<180; ++i){
+        for(int j = 0; j<3; ++j){
+            vertices[i*6+j] = g_pt_cld[data_id].point_cloud(j,i)/1000.0f;
+        }
+        for(int j = 3; j<6; ++j){
+            vertices[i*6+j] = g_pt_cld[data_id].point_color(j-3,i)/255.0f;
+        }
+    }
+
+
+
+    point_shader.use();
+
+    while(!glfwWindowShouldClose(window)){
+        processInput_end();
+        glClearColor(28.0/255.0, 40.0/255.0, 79.0/255.0, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
+
+        glm::mat4 model = glm::mat4(1.0f);
+        glm::mat4 view = glm::mat4(1.0f);
+        glm::mat4 projection = glm::mat4(1.0f);
+
+        projection = glm::perspective(glm::radians(camera->Zoom), (float)screenWidth/2/(float)screenHeight, 0.1f, 100.0f);
+        view = camera->GetViewMatrix();
+
+        for(int data_id = 0; data_id < results.size(); ++data_id){
+
+            int height = imgs[data_id].rows;
+            int width = imgs[data_id].cols;
+
+            float vertices[] = {
+                //Position                                                          //Colors
+                loc_0[data_id](0),   loc_0[data_id](1),   loc_0[data_id](2),       0.5f,   0.5f,    0.5f,
+                loc_1[data_id](0),   loc_1[data_id](1),   loc_1[data_id](2),       0.5f,   0.5f,    0.5f,
+                loc_2[data_id](0),   loc_2[data_id](1),   loc_2[data_id](2),       0.5f,   0.5f,    0.5f,
+                loc_3[data_id](0),   loc_3[data_id](1),   loc_3[data_id](2),       0.5f,   0.5f,    0.5f
+            };
+
+            unsigned int indices[] = {
+                0,  1,  2,
+                1,  2,  3
+            };
+
+            glBindVertexArray(VAO);
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices, GL_STATIC_DRAW);
+
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
+            glEnableVertexAttribArray(0);
+
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+            glEnableVertexAttribArray(1);
+
+            //Model and camera;
+            Eigen::Matrix4f cur_state;
+            
+            c_trans.xyzrpy2t(state[data_id].x, state[data_id].y, state[data_id].z, state[data_id].roll, state[data_id].pitch, state[data_id].yaw , &cur_state);
+
+            model = eigen_mat4_to_glm_mat4(cur_state);
+
+            projection = glm::perspective(glm::radians(45.0f),
+                                            float(screenWidth)/float(screenHeight), 
+                                            0.1f, 
+                                            100.0f);
+
+            point_shader.setMat4("model", model);
+            point_shader.setMat4("view", view);
+            point_shader.setMat4("projection", projection);
+
+            glBindVertexArray(VAO);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        }
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();        
+    }
+}
