@@ -8,7 +8,7 @@
 OpenglPointProcessing::OpenglPointProcessing(std::string window_name){
     w_name = window_name;
     screenWidth = 1600;
-    screenHeight = 1200;
+    screenHeight = 900;
 
     camera = new Camera(glm::vec3(-2.0f, 0.0f, 1.0f), glm::vec3(0.0f,0.0f,-1.0f));
 
@@ -53,13 +53,6 @@ void OpenglPointProcessing::init_opengl(){
 
     point_shader.InitShader("shaders/point/vertex_shader.vs", "shaders/point/fragment_shader.fs");
     plane_shader.InitShader("shaders/plane/with_texture/vertex_shader.vs", "shaders/plane/with_texture/fragment_shader.fs");
-
-    // glDisable(GL_DEPTH_TEST);
-    // glEnable(GL_BLEND);
-    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	// GLuint l_mvpMatrixId = glGetUniformLocation(l_programId, "MVP");
-    // glUseProgram(l_programId);
 
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -220,6 +213,7 @@ void OpenglPointProcessing::plot_global_points(std::vector<PointCloud> & g_pt_cl
         glPointSize(3.0);
         glDrawArrays(GL_POINTS, 0, data_size);
         glBindVertexArray(0);
+        draw_axis(1.0f, 20.0f, &point_shader);
 
     }
 
@@ -328,22 +322,33 @@ void OpenglPointProcessing::clear_window(){
 }
 
 
-void OpenglPointProcessing::draw_axis(float line_length, float line_width){
-    // glLineWidth(line_width);
-    // glBegin(GL_LINES);
-    // //x
-    // glColor4f(1.0f,0.0f,0.0f,1.0f);
-    // glVertex3f(0.0f, 0.0f, 0.0f);
-    // glVertex3f(line_length, 0.0f, 0.0f);
-    // //y
-    // glColor4f(0.0f,1.0f,0.0f,1.0f);
-    // glVertex3f(0.0f, 0.0f, 0.0f);
-    // glVertex3f(0.0f, line_length, 0.0f);
-    // //z
-    // glColor4f(0.0f,0.0f,1.0f,1.0f);
-    // glVertex3f(0.0f, 0.0f, 0.0f);
-    // glVertex3f(0.0f, 0.0f, line_length);
-    // glEnd();
+void OpenglPointProcessing::draw_axis(float line_length, float line_width, Shader * shader){
+    float vertices[]{
+        0.0f, 0.0f, 0.0f,                   1.0f, 0.0f, 0.0f,//v0
+        line_length*1.0f, 0.0f, 0.0f,       1.0f, 0.0f, 0.0f,//vx
+        0.0f, 0.0f, 0.0f,                   0.0f, 1.0f, 0.0f,//v0
+        0.0f, line_length*1.0f, 0.0f,       0.0f, 1.0f, 0.0f,//vy
+        0.0f, 0.0f, 0.0f,                   0.0f, 0.0f, 1.0f,//v0
+        0.0f, 0.0f, line_length*1.0f,       0.0f, 0.0f, 1.0f//vz
+    };
+
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+
+    glm::mat4 model = glm::mat4(1.0f);
+
+    shader->setMat4("model", model);
+
+    glLineWidth(line_width);
+    // glDrawElements(GL_LINES, 6, GL_UNSIGNED_BYTE, 0);
+    glDrawArrays(GL_LINES, 0, 6);
+    
 }
 
 void OpenglPointProcessing::processInput_end(){
@@ -373,7 +378,6 @@ void OpenglPointProcessing::processInput_end(){
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         camera->ProcessKeyboard(RIGHT, deltaTime);
     }
-
 }
 
 void OpenglPointProcessing::mouse_callback(GLFWwindow * window, double xpos, double ypos) {
@@ -723,8 +727,8 @@ void OpenglPointProcessing::draw_surfels(gtsam::Values & results){
                              state[data_id].z, 
                              state[data_id].roll, state[data_id].pitch, state[data_id].yaw , &cur_state);
 
-            // model = eigen_mat4_to_glm_mat4(cur_state) * circle_transformation[data_id];
-            model = eigen_mat4_to_glm_mat4(cur_state);
+            model = eigen_mat4_to_glm_mat4(cur_state) * circle_transformation[data_id];
+            // model = eigen_mat4_to_glm_mat4(cur_state);
 
             projection = glm::perspective(glm::radians(45.0f),
                                             float(screenWidth)/float(screenHeight), 
@@ -736,6 +740,8 @@ void OpenglPointProcessing::draw_surfels(gtsam::Values & results){
             point_shader.setMat4("projection", projection);
 
             glDrawArrays(GL_TRIANGLE_FAN, 0, sides+2);
+            draw_axis(2.0f, 20.0f, &point_shader);
+
         }
 
         glfwSwapBuffers(window);
