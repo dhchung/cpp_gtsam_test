@@ -101,5 +101,6 @@ public:
     void draw_plane_global_wo_texture(gtsam::Values & results);
     void draw_surfels(gtsam::Values & results);
 
+    Eigen::Matrix3f skew_symmetric(Eigen::Vector3f& vector);
 
 };

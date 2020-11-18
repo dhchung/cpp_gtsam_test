@@ -104,8 +104,8 @@ int main(int argc, char** argv){
                                                                measure_noise_distance).finished());
 
     int initial_data_no = 120;
-    int final_data_no = data_num-6;
-    // int final_data_no = 300;
+    // int final_data_no = data_num-6;
+    int final_data_no = 300;
 
 
     for(int i = initial_data_no; i<final_data_no; ++i) {
@@ -160,7 +160,7 @@ int main(int argc, char** argv){
             measurement(2) = ransac_point_3d.plane_model(2);
             measurement(3) = ransac_point_3d.plane_model(3);
 
-            StatePlane prev_state = initials.at<StatePlane>
+            // StatePlane prev_state = initials.at<StatePlane>
 
             graph.add(boost::make_shared<PlanarFactor>(gtsam_idx, gtsam_idx+1, measurement, measNoise));
 
@@ -220,7 +220,8 @@ int main(int argc, char** argv){
 
 
     // ogl_pt_processing.draw_plane_global(results);
-    ogl_pt_processing.draw_plane_global_wo_texture(results);
+    // ogl_pt_processing.draw_plane_global_wo_texture(results);
+    ogl_pt_processing.draw_surfels(results);
     // ogl_pt_processing.draw_point_global(global_cloud, 3.0f);
     ogl_pt_processing.terminate();
     return 0;

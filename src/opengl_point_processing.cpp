@@ -636,27 +636,54 @@ void OpenglPointProcessing::draw_surfels(gtsam::Values & results){
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    std::vector<Eigen::Vector3f> loc_0, loc_1, loc_2, loc_3;
-    loc_0.resize(results.size());
-    loc_1.resize(results.size());
-    loc_2.resize(results.size());
-    loc_3.resize(results.size());
+    std::vector<glm::mat4> circle_transformation;
+    circle_transformation.resize(results.size());
+
+
     std::vector<gtsamexample::StatePlane> state;
     state.resize(results.size());
 
+    for(int data_id = 0; data_id < results.size(); ++data_id){
+        gtsamexample::StatePlane state_tmp = results.at<gtsamexample::StatePlane>(data_id);
+        state[data_id] = state_tmp;
+        Eigen::Vector3f a{-1.0, 0.0, 0.0};
+        Eigen::Vector3f b{(float)state_tmp.nx, (float)state_tmp.ny, (float)state_tmp.nz};
+        Eigen::Vector3f v = skew_symmetric(a)*b;
+        float s = sqrt(v.transpose()*v);
+        float c = a.transpose()*b;
+        Eigen::Matrix3f R = Eigen::Matrix3f::Identity(3,3) + skew_symmetric(v) +
+                            skew_symmetric(v)*skew_symmetric(v)*(1-c)/(s*s);
 
-    float vertices[6*180];
+        Eigen::Vector3f p{-(float)state_tmp.d/((float)state_tmp.nx)/1000.0f, 0.0, 0.0};
 
-    for(int i = 0; i<180; ++i){
-        for(int j = 0; j<3; ++j){
-            vertices[i*6+j] = g_pt_cld[data_id].point_cloud(j,i)/1000.0f;
-        }
-        for(int j = 3; j<6; ++j){
-            vertices[i*6+j] = g_pt_cld[data_id].point_color(j-3,i)/255.0f;
-        }
+        Eigen::Matrix4f T_mat;
+        T_mat<<R,p,0,0,0,1;
+        circle_transformation[data_id] = eigen_mat4_to_glm_mat4(T_mat);
     }
 
+    int sides = 150;
 
+    float vertices[6*(sides+2)];
+    float r = 0.2f;
+
+    for(int i = 0; i<(sides+2); ++i){
+        if(i==0){
+            vertices[0] = 0.0;
+            vertices[1] = 0.0;
+            vertices[2] = 0.0;
+            vertices[3] = 1.0f;
+            vertices[4] = 1.0f;
+            vertices[5] = 0.0f;
+            continue;
+        }
+        vertices[i*6+0] = 0.0;
+        vertices[i*6+1] = r*cos((360.0f/float(sides))*(i-1)*M_PI/180.0f);
+        vertices[i*6+2] = r*sin((360.0f/float(sides))*(i-1)*M_PI/180.0f);
+
+        vertices[i*6+3] = 1.0f;
+        vertices[i*6+4] = 1.0f;
+        vertices[i*6+5] = 0.0f;
+    }
 
     point_shader.use();
 
@@ -677,24 +704,10 @@ void OpenglPointProcessing::draw_surfels(gtsam::Values & results){
             int height = imgs[data_id].rows;
             int width = imgs[data_id].cols;
 
-            float vertices[] = {
-                //Position                                                          //Colors
-                loc_0[data_id](0),   loc_0[data_id](1),   loc_0[data_id](2),       0.5f,   0.5f,    0.5f,
-                loc_1[data_id](0),   loc_1[data_id](1),   loc_1[data_id](2),       0.5f,   0.5f,    0.5f,
-                loc_2[data_id](0),   loc_2[data_id](1),   loc_2[data_id](2),       0.5f,   0.5f,    0.5f,
-                loc_3[data_id](0),   loc_3[data_id](1),   loc_3[data_id](2),       0.5f,   0.5f,    0.5f
-            };
-
-            unsigned int indices[] = {
-                0,  1,  2,
-                1,  2,  3
-            };
 
             glBindVertexArray(VAO);
             glBindBuffer(GL_ARRAY_BUFFER, VBO);
             glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices, GL_STATIC_DRAW);
 
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
             glEnableVertexAttribArray(0);
@@ -705,8 +718,12 @@ void OpenglPointProcessing::draw_surfels(gtsam::Values & results){
             //Model and camera;
             Eigen::Matrix4f cur_state;
             
-            c_trans.xyzrpy2t(state[data_id].x, state[data_id].y, state[data_id].z, state[data_id].roll, state[data_id].pitch, state[data_id].yaw , &cur_state);
+            c_trans.xyzrpy2t(state[data_id].x, 
+                             state[data_id].y, 
+                             state[data_id].z, 
+                             state[data_id].roll, state[data_id].pitch, state[data_id].yaw , &cur_state);
 
+            // model = eigen_mat4_to_glm_mat4(cur_state) * circle_transformation[data_id];
             model = eigen_mat4_to_glm_mat4(cur_state);
 
             projection = glm::perspective(glm::radians(45.0f),
@@ -718,11 +735,25 @@ void OpenglPointProcessing::draw_surfels(gtsam::Values & results){
             point_shader.setMat4("view", view);
             point_shader.setMat4("projection", projection);
 
-            glBindVertexArray(VAO);
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            glDrawArrays(GL_TRIANGLE_FAN, 0, sides+2);
         }
 
         glfwSwapBuffers(window);
         glfwPollEvents();        
     }
+}
+
+
+Eigen::Matrix3f OpenglPointProcessing::skew_symmetric(Eigen::Vector3f& vector){
+    Eigen::Matrix3f result;
+    result(0, 0) = 0.0;
+    result(0, 1) = -vector(2);
+    result(0, 2) = vector(1);
+    result(1, 0) = vector(2);
+    result(1, 1) = 0;
+    result(1, 2) = -vector(0);
+    result(2, 0) = -vector(1);
+    result(2, 1) = vector(0);
+    result(2, 2) = 0;
+    return result;
 }
