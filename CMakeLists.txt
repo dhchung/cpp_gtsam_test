@@ -44,12 +44,6 @@ find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glfw3 3.2 REQUIRED)
-find_package(ASSIMP REQUIRED)
-if (assimp_FOUND)
-    set(ASSIMP_LIBRARY "assimp")
-    add_library(${ASSIMP_LIBRARY} SHARED IMPORTED)
-    set_target_properties(${ASSIMP_LIBRARY} PROPERTIES IMPORTED_LOCATION "${ASSIMP_LIBRARY_DIRS}/libassimp.so")
-endif(assimp_FOUND)
 
 add_executable(${PROJECT_NAME} 
                ${SOURCE}
@@ -63,8 +57,7 @@ add_executable(test_stuff
 
 include_directories(${OPENGL_INCLUDE_DIRS} 
                     ${GLUT_INCLUDE_DIRS} 
-                    ${GLM_INCLUDE_DIRS}
-                    ${ASSIMP_LIBRARY_DIRS})
+                    ${GLM_INCLUDE_DIRS})
 
 
 target_link_libraries (${PROJECT_NAME} 
@@ -77,7 +70,6 @@ target_link_libraries (${PROJECT_NAME}
                        glfw 
                        ${GLEW_LIBRARIES} 
                        ${GLM_LIBRARY_DIRS}
-                       assimp 
                        glad ${CMAKE_DL_LIBS})
 
 
@@ -91,5 +83,4 @@ target_link_libraries (test_stuff
                        glfw 
                        ${GLEW_LIBRARIES} 
                        ${GLM_LIBRARY_DIRS}
-                       assimp 
                        glad ${CMAKE_DL_LIBS})
