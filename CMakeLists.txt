@@ -1,8 +1,13 @@
 cmake_minimum_required(VERSION 3.0)
-project(testing_gtsam)
+project(ship_hull_inspection)
 
 set(SOURCE
     "src/main.cpp")
+
+set(TEST_GTSAM
+    "test/test.cpp")
+
+
 file(GLOB CLASS_SOURCES
      "classes/*.cpp"
      "include/*.h")
@@ -51,6 +56,11 @@ add_executable(${PROJECT_NAME}
                ${LIB_SOURCES}
                ${CLASS_SOURCES})
 
+add_executable(test_stuff 
+               ${TEST_GTSAM}
+               ${LIB_SOURCES}
+               ${CLASS_SOURCES})
+
 include_directories(${OPENGL_INCLUDE_DIRS} 
                     ${GLUT_INCLUDE_DIRS} 
                     ${GLM_INCLUDE_DIRS}
@@ -58,6 +68,20 @@ include_directories(${OPENGL_INCLUDE_DIRS}
 
 
 target_link_libraries (${PROJECT_NAME} 
+                       gtsam
+                       Eigen3::Eigen
+                       ${OpenCV_LIBS}
+                       ${PCL_LIBRARIES}
+                       ${OPENGL_LIBRARIES} 
+                       ${GLUT_LIBRARIES} 
+                       glfw 
+                       ${GLEW_LIBRARIES} 
+                       ${GLM_LIBRARY_DIRS}
+                       assimp 
+                       glad ${CMAKE_DL_LIBS})
+
+
+target_link_libraries (test_stuff
                        gtsam
                        Eigen3::Eigen
                        ${OpenCV_LIBS}
