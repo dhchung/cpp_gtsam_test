@@ -167,7 +167,7 @@ int main(int argc, char** argv){
             graph.add(boost::make_shared<PlanarFactor>(gtsam_idx, gtsam_idx+1, measurement, measNoise));
 
             gtsamexample::StatePlane cur_sp_state = 
-                gtsamexample::StatePlane(cur_dr_state[0],
+                gtsamexample::StatePlane(cur_dr_state[0]+1.0,
                                          cur_dr_state[1],
                                          cur_dr_state[2],
                                          cur_dr_state[3],
@@ -220,6 +220,7 @@ int main(int argc, char** argv){
         global_cloud[i].change_state(optimized_state);
     }
 
+    tools.evaluateError(initials, results);
 
     // ogl_pt_processing.draw_plane_global(results);
     // ogl_pt_processing.draw_plane_global_wo_texture(results);

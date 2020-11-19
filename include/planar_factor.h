@@ -8,6 +8,7 @@
 #include <gtsam/linear/NoiseModel.h>
 #include "state_plane.h"
 #include "math.h"
+#include <iostream>
 
 using namespace gtsam;
 using namespace gtsamexample;

@@ -12,5 +12,5 @@
 #define odom_noise_angle 2*M_PI/180.0
 #define init_noise_translation 10.0
 #define init_noise_angle 1*M_PI/180.0f
-#define measure_noise_normal 0.01
-#define measure_noise_distance 0.01
+#define measure_noise_normal 0.0000000001
+#define measure_noise_distance 0.00000000001

@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.0)
 project(testing_gtsam)
 
-file(GLOB SOURCES
-     "src/*.cpp"
+set(SOURCE
+    "src/main.cpp")
+file(GLOB CLASS_SOURCES
+     "classes/*.cpp"
      "include/*.h")
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
@@ -45,8 +47,9 @@ if (assimp_FOUND)
 endif(assimp_FOUND)
 
 add_executable(${PROJECT_NAME} 
+               ${SOURCE}
                ${LIB_SOURCES}
-               ${SOURCES})
+               ${CLASS_SOURCES})
 
 include_directories(${OPENGL_INCLUDE_DIRS} 
                     ${GLUT_INCLUDE_DIRS} 
