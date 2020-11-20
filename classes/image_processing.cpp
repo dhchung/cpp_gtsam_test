@@ -206,9 +206,9 @@ void ImageProcessing::get_3d_points(std::vector<cv::KeyPoint> &l_keypt,
         
         float disparity = x_l-x_r;
 
-        pt_cld->point_cloud.col(i) << base_line/disparity*focal_length,
-                                     base_line/disparity*(x_l - img_center_x),
-                                     base_line/disparity*(y_l - img_center_y);
+        pt_cld->point_cloud.col(i) << base_line/disparity*focal_length/1000.0f,
+                                      base_line/disparity*(x_l - img_center_x)/1000.0f,
+                                      base_line/disparity*(y_l - img_center_y)/1000.0f;
 
         cv::Vec3b color = l_img.at<cv::Vec3b>(cv::Point(int(x_l), int(y_l)));
         pt_cld->point_color.col(i) << color[2], color[1], color[0];

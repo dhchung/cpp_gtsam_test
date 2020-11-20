@@ -41,7 +41,7 @@ void RANSACPlane::perform_ransac_plane(PointCloud & input,
         distance = distance.array().abs();
 
         std::vector<int> indices;
-        float distance_threshold = 50;
+        float distance_threshold = 0.05;
         get_indices(distance, &indices, distance_threshold);    
 
 

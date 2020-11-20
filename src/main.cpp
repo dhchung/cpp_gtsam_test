@@ -2,13 +2,10 @@
 #include "data_path.h"
 #include "image_processing.h"
 #include "altimeter_processing.h"
-// #include "pointcloud_processing.h"
 #include "ransac_plane.h"
-#include <thread>
 #include <Eigen/Dense>
 #include "pt_cloud.h"
 #include "opengl_point_processing.h"
-// #include "slam.h"
 #include "dr_processing.h"
 #include "parameters.h"
 
@@ -107,7 +104,7 @@ int main(int argc, char** argv){
 
     int initial_data_no = 120;
     int final_data_no = data_num-6;
-    // final_data_no = 122;
+    final_data_no = 300;
 
 
     for(int i = initial_data_no; i<final_data_no; ++i) {
@@ -167,7 +164,7 @@ int main(int argc, char** argv){
             graph.add(boost::make_shared<PlanarFactor>(gtsam_idx, gtsam_idx+1, measurement, measNoise));
 
             gtsamexample::StatePlane cur_sp_state = 
-                gtsamexample::StatePlane(cur_dr_state[0]+1.0,
+                gtsamexample::StatePlane(cur_dr_state[0],
                                          cur_dr_state[1],
                                          cur_dr_state[2],
                                          cur_dr_state[3],
@@ -178,9 +175,10 @@ int main(int argc, char** argv){
                                          ransac_point_3d.plane_model(2),
                                          ransac_point_3d.plane_model(3));
 
+
             initials.insert(gtsam_idx+1, cur_sp_state);
 
-            // Values results = LevenbergMarquardtOptimizer(graph, initials).optimize();
+            Values results = LevenbergMarquardtOptimizer(graph, initials).optimize();
             
             // for(int j = 0; j < results.size(); ++j){
             //     StatePlane optimized_result = results.at<StatePlane>(j);
@@ -224,8 +222,8 @@ int main(int argc, char** argv){
 
     // ogl_pt_processing.draw_plane_global(results);
     // ogl_pt_processing.draw_plane_global_wo_texture(results);
-    ogl_pt_processing.draw_surfels(results);
-    // ogl_pt_processing.draw_point_global(global_cloud, 3.0f);
+    // ogl_pt_processing.draw_surfels(results);
+    ogl_pt_processing.draw_point_global(global_cloud, 3.0f);
     ogl_pt_processing.terminate();
     return 0;
 }

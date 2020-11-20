@@ -41,12 +41,14 @@ Vector OdomFactor::evaluateError(const StatePlane& sp1, const StatePlane & sp2,
 
     Vector3 da12 = g2i*a12;
 
+
     if(H1){
         Matrix H1_ = Matrix::Zero(6,10);
+
         H1_.block(0,0,3,3) = -R1.transpose();
-        H1_.block(0,4,3,1) = R1x.transpose()*(t2-t1);
-        H1_.block(0,5,3,1) = R1y.transpose()*(t2-t1);
-        H1_.block(0,6,3,1) = R1z.transpose()*(t2-t1);
+        H1_.block(0,3,3,1) = R1x.transpose()*(t2-t1);
+        H1_.block(0,4,3,1) = R1y.transpose()*(t2-t1);
+        H1_.block(0,5,3,1) = R1z.transpose()*(t2-t1);
         
         H1_.block(3,3,3,1) = g2i_roll*a12 + g2i*Vector3(-1,0,0);
         H1_.block(3,4,3,1) = g2i_pitch*a12 + g2i*Vector3(0,-1,0);
@@ -69,7 +71,7 @@ Vector OdomFactor::evaluateError(const StatePlane& sp1, const StatePlane & sp2,
     result(3) = measured_(3) - da12(0);
     result(4) = measured_(4) - da12(0);
     result(5) = measured_(5) - da12(0);
-
+    result = -result;
     return result;
 }
 

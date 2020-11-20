@@ -8,9 +8,9 @@
 #define focal_length 526.0 //
 #define depth_err 300.0 //[mm]
 
-#define odom_noise_translation 100.0 //[mm]
-#define odom_noise_angle 2*M_PI/180.0
-#define init_noise_translation 10.0
-#define init_noise_angle 1*M_PI/180.0f
-#define measure_noise_normal 0.0000000001
-#define measure_noise_distance 0.00000000001
+#define odom_noise_translation 0.01 //[m]
+#define odom_noise_angle 0.5*M_PI/180.0
+#define init_noise_translation 0.01//[m]
+#define init_noise_angle 0.5*M_PI/180.0f
+#define measure_noise_normal 0.01
+#define measure_noise_distance 0.001//[m]

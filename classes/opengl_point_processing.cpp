@@ -80,7 +80,7 @@ void OpenglPointProcessing::plot_3d_points(PointCloud & pt_cld){
    
     for(int i = 0; i<data_size; ++i){
         for(int j = 0; j<3; ++j){
-            vertices[i*6+j] = pt_cld.point_cloud(j,i)/1000.0f;
+            vertices[i*6+j] = pt_cld.point_cloud(j,i);
         }
         for(int j = 3; j<6; ++j){
             vertices[i*6+j] = pt_cld.point_color(j-3,i)/255.0f;
@@ -167,7 +167,7 @@ void OpenglPointProcessing::plot_global_points(std::vector<PointCloud> & g_pt_cl
     
         for(int i = 0; i<data_size; ++i){
             for(int j = 0; j<3; ++j){
-                vertices[i*6+j] = g_pt_cld[data_id].point_cloud(j,i)/1000.0f;
+                vertices[i*6+j] = g_pt_cld[data_id].point_cloud(j,i);
             }
             for(int j = 3; j<6; ++j){
                 vertices[i*6+j] = g_pt_cld[data_id].point_color(j-3,i)/255.0f;
@@ -259,7 +259,7 @@ void OpenglPointProcessing::draw_point_global(std::vector<PointCloud> & g_pt_cld
         
             for(int i = 0; i<data_size; ++i){
                 for(int j = 0; j<3; ++j){
-                    vertices[i*6+j] = g_pt_cld[data_id].point_cloud(j,i)/1000.0f;
+                    vertices[i*6+j] = g_pt_cld[data_id].point_cloud(j,i);
                 }
                 for(int j = 3; j<6; ++j){
                     vertices[i*6+j] = g_pt_cld[data_id].point_color(j-3,i)/255.0f;
@@ -446,10 +446,10 @@ void OpenglPointProcessing::draw_plane_global(gtsam::Values & results){
         Eigen::Vector3f line_3(focal_length, img_center_x, img_center_y);
         Eigen::Vector4f plane_param = Eigen::Vector4f(state[data_id].nx, state[data_id].ny, state[data_id].nz, state[data_id].d);
 
-        loc_0[data_id] = line_0 * (-state[data_id].d/(line_0.transpose()*plane_param.segment(0,2)))/1000.0f;
-        loc_1[data_id] = line_1 * (-state[data_id].d/(line_1.transpose()*plane_param.segment(0,2)))/1000.0f;
-        loc_2[data_id] = line_2 * (-state[data_id].d/(line_2.transpose()*plane_param.segment(0,2)))/1000.0f;
-        loc_3[data_id] = line_3 * (-state[data_id].d/(line_3.transpose()*plane_param.segment(0,2)))/1000.0f;
+        loc_0[data_id] = line_0 * (-state[data_id].d/(line_0.transpose()*plane_param.segment(0,3)));
+        loc_1[data_id] = line_1 * (-state[data_id].d/(line_1.transpose()*plane_param.segment(0,3)));
+        loc_2[data_id] = line_2 * (-state[data_id].d/(line_2.transpose()*plane_param.segment(0,3)));
+        loc_3[data_id] = line_3 * (-state[data_id].d/(line_3.transpose()*plane_param.segment(0,3)));
     }
 
     plane_shader.use();
@@ -558,10 +558,10 @@ void OpenglPointProcessing::draw_plane_global_wo_texture(gtsam::Values & results
         Eigen::Vector3f line_3(focal_length, img_center_x, img_center_y);
         Eigen::Vector4f plane_param = Eigen::Vector4f(state[data_id].nx, state[data_id].ny, state[data_id].nz, state[data_id].d);
 
-        loc_0[data_id] = line_0 * (-state[data_id].d/(line_0.transpose()*plane_param.segment(0,2)))/1000.0f;
-        loc_1[data_id] = line_1 * (-state[data_id].d/(line_1.transpose()*plane_param.segment(0,2)))/1000.0f;
-        loc_2[data_id] = line_2 * (-state[data_id].d/(line_2.transpose()*plane_param.segment(0,2)))/1000.0f;
-        loc_3[data_id] = line_3 * (-state[data_id].d/(line_3.transpose()*plane_param.segment(0,2)))/1000.0f;
+        loc_0[data_id] = line_0 * (-state[data_id].d/(line_0.transpose()*plane_param.segment(0,2)));
+        loc_1[data_id] = line_1 * (-state[data_id].d/(line_1.transpose()*plane_param.segment(0,2)));
+        loc_2[data_id] = line_2 * (-state[data_id].d/(line_2.transpose()*plane_param.segment(0,2)));
+        loc_3[data_id] = line_3 * (-state[data_id].d/(line_3.transpose()*plane_param.segment(0,2)));
     }
 
     point_shader.use();
@@ -658,7 +658,7 @@ void OpenglPointProcessing::draw_surfels(gtsam::Values & results){
         Eigen::Matrix3f R = Eigen::Matrix3f::Identity(3,3) + skew_symmetric(v) +
                             skew_symmetric(v)*skew_symmetric(v)*(1-c)/(s*s);
 
-        Eigen::Vector3f p{-(float)state_tmp.d/((float)state_tmp.nx)/1000.0f, 0.0, 0.0};
+        Eigen::Vector3f p{-(float)state_tmp.d/((float)state_tmp.nx), 0.0, 0.0};
 
         Eigen::Matrix4f T_mat;
         T_mat<<R,p,0,0,0,1;
