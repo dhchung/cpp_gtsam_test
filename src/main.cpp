@@ -220,10 +220,12 @@ int main(int argc, char** argv){
 
     tools.evaluateError(initials, results);
 
+    results.print("Fuckin'a\n");
+
     // ogl_pt_processing.draw_plane_global(results);
     // ogl_pt_processing.draw_plane_global_wo_texture(results);
-    // ogl_pt_processing.draw_surfels(results);
-    ogl_pt_processing.draw_point_global(global_cloud, 3.0f);
+    ogl_pt_processing.draw_surfels(results);
+    // ogl_pt_processing.draw_point_global(global_cloud, 3.0f);
     ogl_pt_processing.terminate();
     return 0;
 }

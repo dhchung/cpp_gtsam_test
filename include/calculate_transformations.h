@@ -25,4 +25,6 @@ public:
     void inverse_t(Eigen::Matrix4f T1, Eigen::Matrix4f *T2);
     Eigen::Matrix4f inverse_t(Eigen::Matrix4f T);
 
+    Eigen::Vector4f transform_plane(Eigen::Matrix4f &T1, Eigen::Vector4f & p1,  Eigen::Matrix4f &T2);
+
 };

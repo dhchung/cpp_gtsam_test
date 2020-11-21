@@ -169,3 +169,21 @@ Eigen::Matrix4f CalTransform::inverse_t(Eigen::Matrix4f T){
     result(3,3) = 1.0f;
     return result;
 }
+
+Eigen::Vector4f CalTransform::transform_plane(Eigen::Matrix4f & T1, Eigen::Vector4f & p1, Eigen::Matrix4f & T2){
+    Eigen::Vector3f n1 = p1.segment(0,3);
+    float d1 = p1(3);
+
+    Eigen::Matrix3f R1 = T1.block(0,0,3,3);
+    Eigen::Vector3f t1 = T1.block(0,3,3,1);
+
+    Eigen::Matrix3f R2 = T1.block(0,0,3,3);
+    Eigen::Vector3f t2 = T1.block(0,3,3,1);
+
+    Eigen::Vector3f n2 = R2.transpose()*R1*n1;
+    float d2 = d1 + (t2-t1).transpose()*R1*n1;
+
+    Eigen::Vector4f result;
+    result<<n2, d2;
+    return result;
+}

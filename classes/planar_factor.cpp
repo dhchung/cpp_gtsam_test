@@ -65,11 +65,10 @@ Vector PlanarFactor::evaluateError(const StatePlane& sp1, const StatePlane & sp2
     }
 
     Vector4 result;
-    result(0) = measured_(0) - n21(0);
-    result(1) = measured_(1) - n21(1);
-    result(2) = measured_(2) - n21(2);
-    result(3) = measured_(3) - d21;
-
+    result(0) = n21(0) - measured_(0);
+    result(1) = n21(1) - measured_(1);
+    result(2) = n21(2) - measured_(2);
+    result(3) = d21 - measured_(3);
     return result;
 }
 

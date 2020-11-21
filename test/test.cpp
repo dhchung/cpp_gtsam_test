@@ -7,6 +7,9 @@
 #include "calculate_transformations.h"
 #include <vector>
 
+#include <random>
+#include <iterator>
+
 #include <gtsam/nonlinear/NonlinearFactorGraph.h>
 #include <gtsam/nonlinear/Values.h>
 #include <gtsam/inference/Symbol.h>
@@ -31,9 +34,12 @@
 #include "tools.h"
 #include "detect_loop.h"
 #include "calculate_transformations.h"
+#include "opengl_point_processing.h"
 
+OpenglPointProcessing ogl_pt_processing("3D Point Cloud (non-sequential)");
 
 int main(int argc, char** argv){
+    ogl_pt_processing.init_opengl();
 
     gtsam::noiseModel::Diagonal::shared_ptr priorNoise = 
         gtsam::noiseModel::Diagonal::Sigmas((gtsam::Vector(10)<<init_noise_translation,
@@ -72,21 +78,39 @@ int main(int argc, char** argv){
     graph.add(gtsam::PriorFactor<gtsamexample::StatePlane>(gtsam_idx, prior_factor, priorNoise));
     initials.insert(gtsam_idx, prior_factor);
 
-    // gtsam::Vector measurement = (gtsam::Vector(5)<<0,0,0,0,0).finished();
-    gtsam::Vector6 measurement = gtsam::Vector6::Zero(6);
-    measurement(0) = 1.0;
-    measurement(1) = 1.0;
-    measurement(2) = 1.0;
-    measurement(3) = 0.0;
-    measurement(4) = 0.0;
-    measurement(5) = 2.0*M_PI/180.0f;
+    std::default_random_engine generator;
+    const float stddev = 1;
+    const float mean = 0.0f;
+    std::normal_distribution<float> dist(mean, stddev);
 
-    graph.add(boost::make_shared<OdomFactor>(gtsam_idx, gtsam_idx+1, measurement, odomNoise));
-    initials.insert(gtsam_idx+1, gtsamexample::StatePlane(2.2, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 1.0));
+
+    std::vector<gtsam::Vector6> odometry;
+    std::vector<gtsam::Vector4> measurement;
+    for(int i = 0; i < 2; ++i){
+        //moves in y direction
+        gtsam::Vector6 odom;
+        // odom<<0.0, 1.0, 0.0, 0.0, 0.0, dist(generator)*1*M_PI/180.0;
+        odom = gtsam::Vector6::Zero(6);
+        odometry.push_back(odom);
+        gtsam::Vector4 meas;
+        meas<<-1.0, 0.0, 0.0, dist(generator);
+        measurement.push_back(meas);
+
+        std::cout<<meas.transpose()<<std::endl;
+    }
+
+    for(int i = 0; i < 2; ++i){
+        graph.add(boost::make_shared<OdomFactor>(gtsam_idx, gtsam_idx+1, odometry[i], odomNoise));
+        graph.add(boost::make_shared<PlanarFactor>(gtsam_idx, gtsam_idx+1, measurement[i], measNoise));
+        initials.insert(gtsam_idx+1, gtsamexample::StatePlane(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 1.0));
+        ++gtsam_idx;
+    }
+
 
     gtsam::Values results = gtsam::LevenbergMarquardtOptimizer(graph, initials).optimize();
 
     initials.print("Initials\n");
     results.print("Results\n");
+    ogl_pt_processing.draw_surfels(results);
 
 }

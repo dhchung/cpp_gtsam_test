@@ -80,6 +80,9 @@ public:
 
     void draw_axis(float line_length, float line_width, Shader* shader);
 
+    void draw_cameras(float line_length, float line_width, Shader* shader);
+
+
     void plot_3d_points(PointCloud & pt_cld);
     void plot_global_points(std::vector<PointCloud> & g_pt_cld, std::vector<float> & state, int & idx);
     void terminate();
@@ -100,6 +103,7 @@ public:
     void draw_plane_global(gtsam::Values & results);
     void draw_plane_global_wo_texture(gtsam::Values & results);
     void draw_surfels(gtsam::Values & results);
+
 
     Eigen::Matrix3f skew_symmetric(Eigen::Vector3f& vector);
 

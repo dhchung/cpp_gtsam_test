@@ -419,7 +419,6 @@ void OpenglPointProcessing::insertImages(cv::Mat & img){
     cv::cvtColor(img, img_temp, cv::COLOR_BGR2RGB);
     cv::flip(img_temp, img_temp, -1);
     imgs.push_back(img_temp);
-    std::cout<<"Image is pushed back : "<<static_cast<int>(imgs.size())<<"imgs"<<std::endl;
 }
 
 
@@ -653,15 +652,27 @@ void OpenglPointProcessing::draw_surfels(gtsam::Values & results){
         Eigen::Vector3f a{-1.0, 0.0, 0.0};
         Eigen::Vector3f b{(float)state_tmp.nx, (float)state_tmp.ny, (float)state_tmp.nz};
         Eigen::Vector3f v = skew_symmetric(a)*b;
-        float s = sqrt(v.transpose()*v);
-        float c = a.transpose()*b;
-        Eigen::Matrix3f R = Eigen::Matrix3f::Identity(3,3) + skew_symmetric(v) +
-                            skew_symmetric(v)*skew_symmetric(v)*(1-c)/(s*s);
+
+
+        float s2 = v.transpose()*v;
+        Eigen::Matrix3f R;
+
+        if(s2==0){
+            R = Eigen::Matrix3f::Identity(3,3);
+            
+        } else{
+            float s = sqrt(v.transpose()*v);
+            float c = a.transpose()*b;
+            R = Eigen::Matrix3f::Identity(3,3) + skew_symmetric(v) +
+                                skew_symmetric(v)*skew_symmetric(v)*(1-c)/(s*s);
+        }
+
 
         Eigen::Vector3f p{-(float)state_tmp.d/((float)state_tmp.nx), 0.0, 0.0};
 
         Eigen::Matrix4f T_mat;
         T_mat<<R,p,0,0,0,1;
+
         circle_transformation[data_id] = eigen_mat4_to_glm_mat4(T_mat);
     }
 
