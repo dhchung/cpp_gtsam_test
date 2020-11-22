@@ -232,9 +232,9 @@ void OpenglPointProcessing::plot_global_points(std::vector<PointCloud> & g_pt_cl
 void OpenglPointProcessing::draw_point_global(std::vector<PointCloud> & g_pt_cld, GLfloat size){
 
 
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetScrollCallback(window, scroll_callback);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // glfwSetCursorPosCallback(window, mouse_callback);
+    // glfwSetScrollCallback(window, scroll_callback);
+    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     while(!glfwWindowShouldClose(window)){
         processInput_end();
@@ -316,19 +316,13 @@ void OpenglPointProcessing::draw_point_global(std::vector<PointCloud> & g_pt_cld
         }
 
         std::cout<<"Position"<<std::endl;
-        std::cout<<"x: "<<camera->Position.x<<std::endl;
-        std::cout<<"y: "<<camera->Position.y<<std::endl;
-        std::cout<<"z: "<<camera->Position.z<<std::endl;
+        std::cout<<camera->Position.x<<", "<<camera->Position.y<<", "<<camera->Position.z<<std::endl;
 
         std::cout<<"Front"<<std::endl;
-        std::cout<<"x: "<<camera->Front.x<<std::endl;
-        std::cout<<"y: "<<camera->Front.y<<std::endl;
-        std::cout<<"z: "<<camera->Front.z<<std::endl;
+        std::cout<<camera->Front.x<<", "<<camera->Front.y<<", "<<camera->Front.z<<std::endl;
 
         std::cout<<"Up"<<std::endl;
-        std::cout<<"x: "<<camera->Up.x<<std::endl;
-        std::cout<<"y: "<<camera->Up.y<<std::endl;
-        std::cout<<"z: "<<camera->Up.z<<std::endl;
+        std::cout<<camera->Up.x<<", "<<camera->Up.y<<", "<<camera->Up.z<<std::endl;
 
 
         glfwSwapBuffers(window);
@@ -435,7 +429,11 @@ void OpenglPointProcessing::processInput_end(){
         camera->Front = glm::vec3(0.991178, -0.00864102, 0.132256);
         camera->Up = glm::vec3(0.132251, -0.00115296, -0.991216);
     }
-
+    if(glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS){
+        camera->Position = glm::vec3(0.418237, 3.29749, 1.0539);
+        camera->Front = glm::vec3(0.0608768, -0.995325, 0.0749787);
+        camera->Up = glm::vec3(0.00457735, -0.0748389, -0.997185);
+    }
 }
 
 void OpenglPointProcessing::mouse_callback(GLFWwindow * window, double xpos, double ypos) {
@@ -482,9 +480,9 @@ void OpenglPointProcessing::insertImages(cv::Mat & img){
 
 void OpenglPointProcessing::draw_plane_global(gtsam::Values & results){
 
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetScrollCallback(window, scroll_callback);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // glfwSetCursorPosCallback(window, mouse_callback);
+    // glfwSetScrollCallback(window, scroll_callback);
+    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     std::vector<Eigen::Vector3f> loc_0, loc_1, loc_2, loc_3;
     loc_0.resize(results.size());
@@ -710,9 +708,9 @@ void OpenglPointProcessing::draw_plane_global_wo_texture(gtsam::Values & results
 
 void OpenglPointProcessing::draw_surfels(gtsam::Values & results){
 
-    glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetScrollCallback(window, scroll_callback);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // glfwSetCursorPosCallback(window, mouse_callback);
+    // glfwSetScrollCallback(window, scroll_callback);
+    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     std::vector<glm::mat4> circle_transformation;
     circle_transformation.resize(results.size());
