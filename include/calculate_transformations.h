@@ -27,4 +27,10 @@ public:
 
     Eigen::Vector4f transform_plane(Eigen::Matrix4f &T1, Eigen::Vector4f & p1,  Eigen::Matrix4f &T2);
 
+    Eigen::Vector3f transform_point(Eigen::Matrix4f &T, Eigen::Vector3f &pt);
+
+    void odometry_calculation(float & prev_x, float & prev_y, float & prev_z, float & prev_roll, float & prev_pitch, float & prev_yaw,
+                              float & cur_dx, float & cur_dy, float & cur_dz, float & cur_droll, float & cur_dpitch, float & cur_dyaw,
+                              std::vector<float>* cur_state);
+
 };

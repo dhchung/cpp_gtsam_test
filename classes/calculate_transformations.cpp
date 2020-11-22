@@ -187,3 +187,20 @@ Eigen::Vector4f CalTransform::transform_plane(Eigen::Matrix4f & T1, Eigen::Vecto
     result<<n2, d2;
     return result;
 }
+
+Eigen::Vector3f CalTransform::transform_point(Eigen::Matrix4f &T, Eigen::Vector3f &pt){
+    Eigen::Vector4f pt_1;
+    pt_1<<pt, 1.0;
+    Eigen::Vector3f result;
+    Eigen::Vector4f pt_2;
+
+    pt_2 = T*pt_1;
+    result = pt_2.segment(0,2);
+    return result;
+}
+
+void CalTransform::odometry_calculation(float & prev_x, float & prev_y, float & prev_z, float & prev_roll, float & prev_pitch, float & prev_yaw,
+                                        float & cur_dx, float & cur_dy, float & cur_dz, float & cur_droll, float & cur_dpitch, float & cur_dyaw,
+                                        std::vector<float>* cur_state){
+    
+}

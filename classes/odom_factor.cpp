@@ -36,8 +36,8 @@ Vector OdomFactor::evaluateError(const StatePlane& sp1, const StatePlane & sp2,
     Vector3 t21 = R2.transpose()*(t1-t2);
 
     Vector3 a12 = Vector3(sp2.roll - sp1.roll,
-                          sp2.pitch - sp2.pitch,
-                          sp2.yaw - sp2.yaw);
+                          sp2.pitch - sp1.pitch,
+                          sp2.yaw - sp1.yaw);
 
     Vector3 da12 = g2i*a12;
 
@@ -65,13 +65,12 @@ Vector OdomFactor::evaluateError(const StatePlane& sp1, const StatePlane & sp2,
 
 
     Vector6 result;
-    result(0) = measured_(0) - t12(0);
-    result(1) = measured_(1) - t12(1);
-    result(2) = measured_(2) - t12(2);
-    result(3) = measured_(3) - da12(0);
-    result(4) = measured_(4) - da12(0);
-    result(5) = measured_(5) - da12(0);
-    result = -result;
+    result(0) = t12(0) - measured_(0);
+    result(1) = t12(1) - measured_(1);
+    result(2) = t12(2) - measured_(2);
+    result(3) = da12(0)- measured_(3);
+    result(4) = da12(1)- measured_(4);
+    result(5) = da12(2)- measured_(5);
     return result;
 }
 

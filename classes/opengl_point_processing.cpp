@@ -107,7 +107,7 @@ void OpenglPointProcessing::plot_3d_points(PointCloud & pt_cld){
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 projection = glm::mat4(1.0f);
 
-    projection = glm::perspective(glm::radians(45.0f),
+    projection = glm::perspective(glm::radians(camera->Zoom),
                                     float(screenWidth)/float(screenHeight), 
                                     0.1f, 
                                     100.0f);
@@ -251,6 +251,14 @@ void OpenglPointProcessing::draw_point_global(std::vector<PointCloud> & g_pt_cld
 
 
 
+        // glm::mat4 Ortho_T = glm::mat4(1.0);
+        // glm::translate(Ortho_T, glm::vec3(0.0, 0.0, 0.5));
+        // glm::mat4 Ortho_S = glm::mat4(1.0);
+        // glm::translate(Ortho_S, glm::vec3(1.0, 1.0, 0.0001));
+        // glm::mat4 Ortho_V = Ortho_S*Ortho_T;
+        // projection = Ortho_V;
+
+
         for(int data_id = 0; data_id<g_pt_cld.size(); ++data_id){
 
             int data_size = g_pt_cld[data_id].point_cloud.cols();
@@ -289,10 +297,11 @@ void OpenglPointProcessing::draw_point_global(std::vector<PointCloud> & g_pt_cld
 
             model = eigen_mat4_to_glm_mat4(cur_state);
 
-            projection = glm::perspective(glm::radians(45.0f),
+            projection = glm::perspective(glm::radians(camera->Zoom),
                                             float(screenWidth)/float(screenHeight), 
                                             0.1f, 
                                             100.0f);
+
 
             point_shader.setMat4("model", model);
             point_shader.setMat4("view", view);
@@ -305,6 +314,22 @@ void OpenglPointProcessing::draw_point_global(std::vector<PointCloud> & g_pt_cld
             glBindVertexArray(0);
 
         }
+
+        std::cout<<"Position"<<std::endl;
+        std::cout<<"x: "<<camera->Position.x<<std::endl;
+        std::cout<<"y: "<<camera->Position.y<<std::endl;
+        std::cout<<"z: "<<camera->Position.z<<std::endl;
+
+        std::cout<<"Front"<<std::endl;
+        std::cout<<"x: "<<camera->Front.x<<std::endl;
+        std::cout<<"y: "<<camera->Front.y<<std::endl;
+        std::cout<<"z: "<<camera->Front.z<<std::endl;
+
+        std::cout<<"Up"<<std::endl;
+        std::cout<<"x: "<<camera->Up.x<<std::endl;
+        std::cout<<"y: "<<camera->Up.y<<std::endl;
+        std::cout<<"z: "<<camera->Up.z<<std::endl;
+
 
         glfwSwapBuffers(window);
         glfwPollEvents();        
@@ -514,7 +539,7 @@ void OpenglPointProcessing::draw_plane_global(gtsam::Values & results){
 
             model = eigen_mat4_to_glm_mat4(cur_state);
 
-            projection = glm::perspective(glm::radians(45.0f),
+            projection = glm::perspective(glm::radians(camera->Zoom),
                                             float(screenWidth)/float(screenHeight), 
                                             0.1f, 
                                             100.0f);
@@ -614,7 +639,7 @@ void OpenglPointProcessing::draw_plane_global_wo_texture(gtsam::Values & results
 
             model = eigen_mat4_to_glm_mat4(cur_state);
 
-            projection = glm::perspective(glm::radians(45.0f),
+            projection = glm::perspective(glm::radians(camera->Zoom),
                                             float(screenWidth)/float(screenHeight), 
                                             0.1f, 
                                             100.0f);
@@ -626,6 +651,23 @@ void OpenglPointProcessing::draw_plane_global_wo_texture(gtsam::Values & results
             glBindVertexArray(VAO);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         }
+
+        std::cout<<"Position"<<std::endl;
+        std::cout<<"x: "<<camera->Position.x<<std::endl;
+        std::cout<<"y: "<<camera->Position.y<<std::endl;
+        std::cout<<"z: "<<camera->Position.z<<std::endl;
+
+        std::cout<<"Front"<<std::endl;
+        std::cout<<"x: "<<camera->Front.x<<std::endl;
+        std::cout<<"y: "<<camera->Front.y<<std::endl;
+        std::cout<<"z: "<<camera->Front.z<<std::endl;
+
+        std::cout<<"Up"<<std::endl;
+        std::cout<<"x: "<<camera->Up.x<<std::endl;
+        std::cout<<"y: "<<camera->Up.y<<std::endl;
+        std::cout<<"z: "<<camera->Up.z<<std::endl;
+
+
 
         glfwSwapBuffers(window);
         glfwPollEvents();        
@@ -741,7 +783,7 @@ void OpenglPointProcessing::draw_surfels(gtsam::Values & results){
             model = eigen_mat4_to_glm_mat4(cur_state) * circle_transformation[data_id];
             // model = eigen_mat4_to_glm_mat4(cur_state);
 
-            projection = glm::perspective(glm::radians(45.0f),
+            projection = glm::perspective(glm::radians(camera->Zoom),
                                             float(screenWidth)/float(screenHeight), 
                                             0.1f, 
                                             100.0f);

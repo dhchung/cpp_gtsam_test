@@ -39,6 +39,8 @@
 
 #include "detect_loop.h"
 
+#include "absolute_factor.h"
+
 using namespace std;
 
 using namespace gtsam;
@@ -54,6 +56,8 @@ OpenglPointProcessing ogl_pt_processing("3D Point Cloud (non-sequential)");
 DrProcessing dr_processing;
 
 Tools tools;
+
+DetectLoop detect_loop;
 
 int main(int argc, char** argv){
 
@@ -75,6 +79,11 @@ int main(int argc, char** argv){
     gtsam::Values initials;
     int gtsam_idx = 0;
 
+
+    gtsam::noiseModel::Diagonal::shared_ptr absoluteNoise = 
+        gtsam::noiseModel::Diagonal::Sigmas(gtsam::Vector3(absolute_noise_translation,
+                                                           absolute_noise_angle,
+                                                           absolute_noise_angle));
 
     gtsam::noiseModel::Diagonal::shared_ptr priorNoise = 
         gtsam::noiseModel::Diagonal::Sigmas((gtsam::Vector(10)<<init_noise_translation,
@@ -104,8 +113,9 @@ int main(int argc, char** argv){
 
     int initial_data_no = 120;
     int final_data_no = data_num-6;
-    final_data_no = 300;
+    // final_data_no = 300;
 
+    Values inloop_result;
 
     for(int i = initial_data_no; i<final_data_no; ++i) {
 
@@ -148,20 +158,9 @@ int main(int argc, char** argv){
             initials.insert(gtsam_idx, init_sp_state);
             ogl_pt_processing.insertImages(img_proc.l_img);
             global_cloud.push_back(ransac_point_3d);
-
+            inloop_result = LevenbergMarquardtOptimizer(graph, initials).optimize();
             
         }else{
-            gtsam::Vector6 rel_odom = tools.turnVectorToGTSAMVector(rel_dr_prev_state);
-            graph.add(boost::make_shared<OdomFactor>(gtsam_idx, gtsam_idx+1, rel_odom, odomNoise));
-            gtsam::Vector4 measurement;
-            measurement(0) = ransac_point_3d.plane_model(0);
-            measurement(1) = ransac_point_3d.plane_model(1);
-            measurement(2) = ransac_point_3d.plane_model(2);
-            measurement(3) = ransac_point_3d.plane_model(3);
-
-            // StatePlane prev_state = initials.at<StatePlane>
-
-            graph.add(boost::make_shared<PlanarFactor>(gtsam_idx, gtsam_idx+1, measurement, measNoise));
 
             gtsamexample::StatePlane cur_sp_state = 
                 gtsamexample::StatePlane(cur_dr_state[0],
@@ -175,27 +174,77 @@ int main(int argc, char** argv){
                                          ransac_point_3d.plane_model(2),
                                          ransac_point_3d.plane_model(3));
 
+            std::vector<int> loop_candidates;
+            std::vector<float> distance;
 
+            gtsam::Vector4 measurement;
+            measurement(0) = ransac_point_3d.plane_model(0);
+            measurement(1) = ransac_point_3d.plane_model(1);
+            measurement(2) = ransac_point_3d.plane_model(2);
+            measurement(3) = ransac_point_3d.plane_model(3);
+
+            detect_loop.find_loop_distance(cur_sp_state, inloop_result, &loop_candidates, &distance);
+
+            for(int loop_id:loop_candidates){
+                std::cout<<loop_id<<", ";
+            }
+            std::cout<<std::endl;
+
+
+            if(!loop_candidates.empty()){
+                for(int id = 0; id<loop_candidates.size(); ++id){
+                    int candid_id = loop_candidates[id];
+                    double dist = (double)distance[id];
+
+                    double meas_noise_n = measure_noise_normal + exp(dist/5)-1.0;
+                    double meas_noise_d = measure_noise_normal + exp(dist)-1.0;
+
+                    gtsam::noiseModel::Diagonal::shared_ptr measNoise_d = 
+                        gtsam::noiseModel::Diagonal::Sigmas((gtsam::Vector(4)<<meas_noise_n,
+                                                                               meas_noise_n,
+                                                                               meas_noise_n,
+                                                                               meas_noise_d).finished());
+
+                    graph.add(boost::make_shared<PlanarFactor>(candid_id, gtsam_idx+1, measurement, measNoise_d));
+                }
+            }
+
+
+
+            gtsam::Vector6 rel_odom = tools.turnVectorToGTSAMVector(rel_dr_prev_state);
+            graph.add(boost::make_shared<OdomFactor>(gtsam_idx, gtsam_idx+1, rel_odom, odomNoise));
+
+            gtsam::Vector3 absolute_measure(cur_dr_state[2], cur_dr_state[3], cur_dr_state[4]);
+
+            graph.add(boost::make_shared<AbsoluteFactor>(gtsam_idx+1, absolute_measure, absoluteNoise));
+
+            // StatePlane prev_state = initials.at<StatePlane>
+
+            graph.add(boost::make_shared<PlanarFactor>(gtsam_idx, gtsam_idx+1, measurement, measNoise));
             initials.insert(gtsam_idx+1, cur_sp_state);
 
-            Values results = LevenbergMarquardtOptimizer(graph, initials).optimize();
+            global_cloud.push_back(ransac_point_3d);
             
-            // for(int j = 0; j < results.size(); ++j){
-            //     StatePlane optimized_result = results.at<StatePlane>(j);
-            //     std::vector<float> optimized_state;
-            //     optimized_state.push_back(optimized_result.x);
-            //     optimized_state.push_back(optimized_result.y);
-            //     optimized_state.push_back(optimized_result.z);
-            //     optimized_state.push_back(optimized_result.roll);
-            //     optimized_state.push_back(optimized_result.pitch);
-            //     optimized_state.push_back(optimized_result.yaw);
+            inloop_result = LevenbergMarquardtOptimizer(graph, initials).optimize();
 
-            //     global_cloud[j].change_state(optimized_state);
-            // }
+            for(int j = 0; j < inloop_result.size(); ++j){
+                StatePlane optimized_result = inloop_result.at<StatePlane>(j);
+                std::vector<float> optimized_state;
+                optimized_state.push_back(optimized_result.x);
+                optimized_state.push_back(optimized_result.y);
+                optimized_state.push_back(optimized_result.z);
+                optimized_state.push_back(optimized_result.roll);
+                optimized_state.push_back(optimized_result.pitch);
+                optimized_state.push_back(optimized_result.yaw);
+                global_cloud[j].change_state(optimized_state);
+
+            }
+
+
+
 
             ++gtsam_idx;
             ogl_pt_processing.insertImages(img_proc.l_img);
-            global_cloud.push_back(ransac_point_3d);
 
         }
 
@@ -220,12 +269,10 @@ int main(int argc, char** argv){
 
     tools.evaluateError(initials, results);
 
-    results.print("Fuckin'a\n");
-
     // ogl_pt_processing.draw_plane_global(results);
     // ogl_pt_processing.draw_plane_global_wo_texture(results);
-    ogl_pt_processing.draw_surfels(results);
-    // ogl_pt_processing.draw_point_global(global_cloud, 3.0f);
+    // ogl_pt_processing.draw_surfels(results);
+    ogl_pt_processing.draw_point_global(global_cloud, 3.0f);
     ogl_pt_processing.terminate();
     return 0;
 }

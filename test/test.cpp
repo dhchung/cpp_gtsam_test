@@ -53,13 +53,15 @@ int main(int argc, char** argv){
                                                                 measure_noise_normal,
                                                                 measure_noise_distance).finished());
 
+    float odom_noise_ang = odom_noise_angle;
+
     gtsam::noiseModel::Diagonal::shared_ptr odomNoise = 
         gtsam::noiseModel::Diagonal::Sigmas((gtsam::Vector(6)<<odom_noise_translation,
                                                                odom_noise_translation,
                                                                odom_noise_translation,
-                                                               odom_noise_angle,
-                                                               odom_noise_angle,
-                                                               odom_noise_angle).finished());
+                                                               odom_noise_ang,
+                                                               odom_noise_ang,
+                                                               odom_noise_ang).finished());
     
     gtsam::noiseModel::Diagonal::shared_ptr measNoise = 
         gtsam::noiseModel::Diagonal::Sigmas((gtsam::Vector(4)<<measure_noise_normal,
@@ -72,6 +74,7 @@ int main(int argc, char** argv){
         gtsamexample::StatePlane(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0, 1.0);
 
     gtsam::Values initials;
+    gtsam::Values results;
 
     int gtsam_idx = 0;
     gtsam::NonlinearFactorGraph graph;
@@ -83,7 +86,6 @@ int main(int argc, char** argv){
     const float mean = 0.0f;
     std::normal_distribution<float> dist(mean, stddev);
 
-
     std::vector<gtsam::Vector6> odometry;
     std::vector<gtsam::Vector4> measurement;
     for(int i = 0; i < 2; ++i){
@@ -91,12 +93,19 @@ int main(int argc, char** argv){
         gtsam::Vector6 odom;
         // odom<<0.0, 1.0, 0.0, 0.0, 0.0, dist(generator)*1*M_PI/180.0;
         odom = gtsam::Vector6::Zero(6);
+        // odom(1) = 1.0f;
+        odom(5) = dist(generator)*1*M_PI/180.0f;
         odometry.push_back(odom);
         gtsam::Vector4 meas;
-        meas<<-1.0, 0.0, 0.0, dist(generator);
+
+        float value = 1.0 + dist(generator)/20.0f;
+        value = 1.0f;
+        meas<<-1.0, 0.0, 0.0, value;
         measurement.push_back(meas);
 
-        std::cout<<meas.transpose()<<std::endl;
+        std::cout<<odom.transpose()<<std::endl;
+
+        results = gtsam::LevenbergMarquardtOptimizer(graph, initials).optimize();
     }
 
     for(int i = 0; i < 2; ++i){
@@ -107,7 +116,7 @@ int main(int argc, char** argv){
     }
 
 
-    gtsam::Values results = gtsam::LevenbergMarquardtOptimizer(graph, initials).optimize();
+    results = gtsam::LevenbergMarquardtOptimizer(graph, initials).optimize();
 
     initials.print("Initials\n");
     results.print("Results\n");
