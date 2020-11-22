@@ -424,6 +424,18 @@ void OpenglPointProcessing::processInput_end(){
         camera->Up = glm::vec3(0.0889647, 0.37054, -0.924546);
     }
 
+    if(glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS){
+        camera->Position = glm::vec3(0.478709, -7.34962, -14.2159);
+        camera->Front = glm::vec3(-0.0174507, 0.000243689, 0.999848);
+        camera->Up = glm::vec3(-0.99975, 0.013961, -0.0174524);
+    }
+
+    if(glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS){
+        camera->Position = glm::vec3(-13.5037, -7.05344, -0.170279);
+        camera->Front = glm::vec3(0.991178, -0.00864102, 0.132256);
+        camera->Up = glm::vec3(0.132251, -0.00115296, -0.991216);
+    }
+
 }
 
 void OpenglPointProcessing::mouse_callback(GLFWwindow * window, double xpos, double ypos) {
