@@ -183,31 +183,31 @@ int main(int argc, char** argv){
             measurement(2) = ransac_point_3d.plane_model(2);
             measurement(3) = ransac_point_3d.plane_model(3);
 
-            detect_loop.find_loop_distance(cur_sp_state, inloop_result, &loop_candidates, &distance);
+            // detect_loop.find_loop_distance(cur_sp_state, inloop_result, &loop_candidates, &distance);
 
-            for(int loop_id:loop_candidates){
-                std::cout<<loop_id<<", ";
-            }
-            std::cout<<std::endl;
+            // for(int loop_id:loop_candidates){
+            //     std::cout<<loop_id<<", ";
+            // }
+            // std::cout<<std::endl;
 
 
-            if(!loop_candidates.empty()){
-                for(int id = 0; id<loop_candidates.size(); ++id){
-                    int candid_id = loop_candidates[id];
-                    double dist = (double)distance[id];
+            // if(!loop_candidates.empty()){
+            //     for(int id = 0; id<loop_candidates.size(); ++id){
+            //         int candid_id = loop_candidates[id];
+            //         double dist = (double)distance[id];
 
-                    double meas_noise_n = measure_noise_normal + exp(dist/5)-1.0;
-                    double meas_noise_d = measure_noise_normal + exp(dist)-1.0;
+            //         double meas_noise_n = measure_noise_normal + exp(dist/5)-1.0;
+            //         double meas_noise_d = measure_noise_normal + exp(dist)-1.0;
 
-                    gtsam::noiseModel::Diagonal::shared_ptr measNoise_d = 
-                        gtsam::noiseModel::Diagonal::Sigmas((gtsam::Vector(4)<<meas_noise_n,
-                                                                               meas_noise_n,
-                                                                               meas_noise_n,
-                                                                               meas_noise_d).finished());
+            //         gtsam::noiseModel::Diagonal::shared_ptr measNoise_d = 
+            //             gtsam::noiseModel::Diagonal::Sigmas((gtsam::Vector(4)<<meas_noise_n,
+            //                                                                    meas_noise_n,
+            //                                                                    meas_noise_n,
+            //                                                                    meas_noise_d).finished());
 
-                    graph.add(boost::make_shared<PlanarFactor>(candid_id, gtsam_idx+1, measurement, measNoise_d));
-                }
-            }
+            //         graph.add(boost::make_shared<PlanarFactor>(candid_id, gtsam_idx+1, measurement, measNoise_d));
+            //     }
+            // }
 
 
 
@@ -225,20 +225,20 @@ int main(int argc, char** argv){
 
             global_cloud.push_back(ransac_point_3d);
             
-            inloop_result = LevenbergMarquardtOptimizer(graph, initials).optimize();
+            // inloop_result = LevenbergMarquardtOptimizer(graph, initials).optimize();
 
-            for(int j = 0; j < inloop_result.size(); ++j){
-                StatePlane optimized_result = inloop_result.at<StatePlane>(j);
-                std::vector<float> optimized_state;
-                optimized_state.push_back(optimized_result.x);
-                optimized_state.push_back(optimized_result.y);
-                optimized_state.push_back(optimized_result.z);
-                optimized_state.push_back(optimized_result.roll);
-                optimized_state.push_back(optimized_result.pitch);
-                optimized_state.push_back(optimized_result.yaw);
-                global_cloud[j].change_state(optimized_state);
+            // for(int j = 0; j < inloop_result.size(); ++j){
+            //     StatePlane optimized_result = inloop_result.at<StatePlane>(j);
+            //     std::vector<float> optimized_state;
+            //     optimized_state.push_back(optimized_result.x);
+            //     optimized_state.push_back(optimized_result.y);
+            //     optimized_state.push_back(optimized_result.z);
+            //     optimized_state.push_back(optimized_result.roll);
+            //     optimized_state.push_back(optimized_result.pitch);
+            //     optimized_state.push_back(optimized_result.yaw);
+            //     global_cloud[j].change_state(optimized_state);
 
-            }
+            // }
 
 
 

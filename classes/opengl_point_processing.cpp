@@ -403,6 +403,27 @@ void OpenglPointProcessing::processInput_end(){
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         camera->ProcessKeyboard(RIGHT, deltaTime);
     }
+    if(glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS){
+        camera->Position = glm::vec3(-1.67919, 5.02597, 0.0632081);
+        camera->Front = glm::vec3(0.393309, -0.895984, 0.206204);
+        camera->Up = glm::vec3(0.0828833, -0.188813, -0.978509);
+    }
+    if(glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS){
+        camera->Position = glm::vec3(3.53543, 4.85189, -0.181782);
+        camera->Front = glm::vec3(-0.325681, -0.89968, 0.290702);
+        camera->Up = glm::vec3(-0.0989494, -0.273344, -0.956814);
+    }
+    if(glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS){
+        camera->Position = glm::vec3(3.55824, -20.3131, 1.08095);
+        camera->Front = glm::vec3(-0.50642,0.859736 ,0.066274);
+        camera->Up = glm::vec3(-0.0336364, 0.0571037, -0.997802);
+    }
+    if(glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS){
+        camera->Position = glm::vec3(-2.39743, -22.9813, -2.20565);
+        camera->Front = glm::vec3(0.215845, 0.898998, 0.38107);
+        camera->Up = glm::vec3(0.0889647, 0.37054, -0.924546);
+    }
+
 }
 
 void OpenglPointProcessing::mouse_callback(GLFWwindow * window, double xpos, double ypos) {
