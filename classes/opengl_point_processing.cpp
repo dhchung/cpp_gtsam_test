@@ -33,9 +33,10 @@ void OpenglPointProcessing::init_opengl(){
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,3); //OpenGL 3.3
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); //Use only core profiles of opengl
 
-
+    
     window = glfwCreateWindow(screenWidth,screenHeight, w_name.c_str(), NULL, NULL);
 
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetWindowUserPointer(window, this);
 
 
@@ -232,9 +233,9 @@ void OpenglPointProcessing::plot_global_points(std::vector<PointCloud> & g_pt_cl
 void OpenglPointProcessing::draw_point_global(std::vector<PointCloud> & g_pt_cld, GLfloat size){
 
 
-    // glfwSetCursorPosCallback(window, mouse_callback);
-    // glfwSetScrollCallback(window, scroll_callback);
-    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     while(!glfwWindowShouldClose(window)){
         processInput_end();
@@ -246,7 +247,7 @@ void OpenglPointProcessing::draw_point_global(std::vector<PointCloud> & g_pt_cld
         glm::mat4 projection = glm::mat4(1.0f);
 
         point_shader.use();
-        projection = glm::perspective(glm::radians(camera->Zoom), (float)screenWidth/2/(float)screenHeight, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(camera->Zoom), (float)screenWidth/(float)screenHeight, 0.1f, 100.0f);
         view = camera->GetViewMatrix();
 
 
@@ -397,6 +398,11 @@ void OpenglPointProcessing::processInput_end(){
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         camera->ProcessKeyboard(RIGHT, deltaTime);
     }
+    if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
+
+    }
+
+
     if(glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS){
         camera->Position = glm::vec3(-1.67919, 5.02597, 0.0632081);
         camera->Front = glm::vec3(0.393309, -0.895984, 0.206204);
@@ -518,7 +524,7 @@ void OpenglPointProcessing::draw_plane_global(gtsam::Values & results){
         glm::mat4 view = glm::mat4(1.0f);
         glm::mat4 projection = glm::mat4(1.0f);
 
-        projection = glm::perspective(glm::radians(camera->Zoom), (float)screenWidth/2/(float)screenHeight, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(camera->Zoom), (float)screenWidth/(float)screenHeight, 0.1f, 100.0f);
         view = camera->GetViewMatrix();
 
         for(int data_id = 0; data_id < results.size(); ++data_id){
@@ -630,7 +636,7 @@ void OpenglPointProcessing::draw_plane_global_wo_texture(gtsam::Values & results
         glm::mat4 view = glm::mat4(1.0f);
         glm::mat4 projection = glm::mat4(1.0f);
 
-        projection = glm::perspective(glm::radians(camera->Zoom), (float)screenWidth/2/(float)screenHeight, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(camera->Zoom), (float)screenWidth/(float)screenHeight, 0.1f, 100.0f);
         view = camera->GetViewMatrix();
 
         for(int data_id = 0; data_id < results.size(); ++data_id){
@@ -670,11 +676,6 @@ void OpenglPointProcessing::draw_plane_global_wo_texture(gtsam::Values & results
 
             model = eigen_mat4_to_glm_mat4(cur_state);
 
-            projection = glm::perspective(glm::radians(camera->Zoom),
-                                            float(screenWidth)/float(screenHeight), 
-                                            0.1f, 
-                                            100.0f);
-
             point_shader.setMat4("model", model);
             point_shader.setMat4("view", view);
             point_shader.setMat4("projection", projection);
@@ -683,20 +684,20 @@ void OpenglPointProcessing::draw_plane_global_wo_texture(gtsam::Values & results
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         }
 
-        std::cout<<"Position"<<std::endl;
-        std::cout<<"x: "<<camera->Position.x<<std::endl;
-        std::cout<<"y: "<<camera->Position.y<<std::endl;
-        std::cout<<"z: "<<camera->Position.z<<std::endl;
+        // std::cout<<"Position"<<std::endl;
+        // std::cout<<"x: "<<camera->Position.x<<std::endl;
+        // std::cout<<"y: "<<camera->Position.y<<std::endl;
+        // std::cout<<"z: "<<camera->Position.z<<std::endl;
 
-        std::cout<<"Front"<<std::endl;
-        std::cout<<"x: "<<camera->Front.x<<std::endl;
-        std::cout<<"y: "<<camera->Front.y<<std::endl;
-        std::cout<<"z: "<<camera->Front.z<<std::endl;
+        // std::cout<<"Front"<<std::endl;
+        // std::cout<<"x: "<<camera->Front.x<<std::endl;
+        // std::cout<<"y: "<<camera->Front.y<<std::endl;
+        // std::cout<<"z: "<<camera->Front.z<<std::endl;
 
-        std::cout<<"Up"<<std::endl;
-        std::cout<<"x: "<<camera->Up.x<<std::endl;
-        std::cout<<"y: "<<camera->Up.y<<std::endl;
-        std::cout<<"z: "<<camera->Up.z<<std::endl;
+        // std::cout<<"Up"<<std::endl;
+        // std::cout<<"x: "<<camera->Up.x<<std::endl;
+        // std::cout<<"y: "<<camera->Up.y<<std::endl;
+        // std::cout<<"z: "<<camera->Up.z<<std::endl;
 
 
 
@@ -784,7 +785,7 @@ void OpenglPointProcessing::draw_surfels(gtsam::Values & results){
         glm::mat4 view = glm::mat4(1.0f);
         glm::mat4 projection = glm::mat4(1.0f);
 
-        projection = glm::perspective(glm::radians(camera->Zoom), (float)screenWidth/2/(float)screenHeight, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(camera->Zoom), (float)screenWidth/(float)screenHeight, 0.1f, 100.0f);
         view = camera->GetViewMatrix();
 
         for(int data_id = 0; data_id < results.size(); ++data_id){
@@ -814,11 +815,6 @@ void OpenglPointProcessing::draw_surfels(gtsam::Values & results){
             model = eigen_mat4_to_glm_mat4(cur_state) * circle_transformation[data_id];
             // model = eigen_mat4_to_glm_mat4(cur_state);
 
-            projection = glm::perspective(glm::radians(camera->Zoom),
-                                            float(screenWidth)/float(screenHeight), 
-                                            0.1f, 
-                                            100.0f);
-
             point_shader.setMat4("model", model);
             point_shader.setMat4("view", view);
             point_shader.setMat4("projection", projection);
@@ -846,4 +842,138 @@ Eigen::Matrix3f OpenglPointProcessing::skew_symmetric(Eigen::Vector3f& vector){
     result(2, 1) = vector(0);
     result(2, 2) = 0;
     return result;
+}
+
+
+void OpenglPointProcessing::draw_point_global_double_window_test(std::vector<PointCloud> & g_pt_cld, GLfloat size){
+
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    while(!glfwWindowShouldClose(window)){
+        processInput_end();
+        glClearColor(28.0/255.0, 40.0/255.0, 79.0/255.0, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  
+
+
+
+        glm::mat4 model = glm::mat4(1.0f);
+        glm::mat4 view = glm::mat4(1.0f);
+        glm::mat4 projection = glm::mat4(1.0f);
+
+        glViewport(0, 0, screenWidth/2, screenHeight);
+        point_shader.use();
+        projection = glm::perspective(glm::radians(camera->Zoom), (float)screenWidth/2.0f/(float)screenHeight, 0.1f, 100.0f);
+        view = camera->GetViewMatrix();
+
+        for(int data_id = 0; data_id<g_pt_cld.size(); ++data_id){
+
+            int data_size = g_pt_cld[data_id].point_cloud.cols();
+
+            float vertices[6*data_size];
+        
+            for(int i = 0; i<data_size; ++i){
+                for(int j = 0; j<3; ++j){
+                    vertices[i*6+j] = g_pt_cld[data_id].point_cloud(j,i);
+                }
+                for(int j = 3; j<6; ++j){
+                    vertices[i*6+j] = g_pt_cld[data_id].point_color(j-3,i)/255.0f;
+                }
+            }
+
+            glBindVertexArray(VAO);
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
+            glEnableVertexAttribArray(0);
+
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+            glEnableVertexAttribArray(1);
+
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
+
+
+            //Model and camera;
+
+
+            Eigen::Matrix4f cur_state;
+            
+            c_trans.xyzrpy2t(g_pt_cld[data_id].state, &cur_state);
+
+            model = eigen_mat4_to_glm_mat4(cur_state);
+
+            point_shader.setMat4("model", model);
+            point_shader.setMat4("view", view);
+            point_shader.setMat4("projection", projection);
+            point_shader.setBool("use_texture_in", false);
+            
+            glBindVertexArray(VAO);
+            glPointSize(3.0);
+            glDrawArrays(GL_POINTS, 0, data_size);
+            glBindVertexArray(0);
+
+        }
+
+        glViewport(screenWidth/2, 0, screenWidth/2, screenHeight);
+        point_shader.use();
+        projection = glm::perspective(glm::radians(camera->Zoom), (float)screenWidth/2.0f/(float)screenHeight, 0.1f, 100.0f);
+        view = camera->GetViewMatrix();
+
+        for(int data_id = 0; data_id<g_pt_cld.size(); ++data_id){
+
+            int data_size = g_pt_cld[data_id].point_cloud.cols();
+
+            float vertices[6*data_size];
+        
+            for(int i = 0; i<data_size; ++i){
+                for(int j = 0; j<3; ++j){
+                    vertices[i*6+j] = g_pt_cld[data_id].point_cloud(j,i);
+                }
+                for(int j = 3; j<6; ++j){
+                    vertices[i*6+j] = g_pt_cld[data_id].point_color(j-3,i)/255.0f;
+                }
+            }
+
+            glBindVertexArray(VAO);
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
+            glEnableVertexAttribArray(0);
+
+            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+            glEnableVertexAttribArray(1);
+
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
+
+
+            //Model and camera;
+
+
+            Eigen::Matrix4f cur_state;
+            
+            c_trans.xyzrpy2t(g_pt_cld[data_id].dr_state, &cur_state);
+
+            model = eigen_mat4_to_glm_mat4(cur_state);
+
+            point_shader.setMat4("model", model);
+            point_shader.setMat4("view", view);
+            point_shader.setMat4("projection", projection);
+            point_shader.setBool("use_texture_in", false);
+            
+            glBindVertexArray(VAO);
+            glPointSize(3.0);
+            glDrawArrays(GL_POINTS, 0, data_size);
+            glBindVertexArray(0);
+
+        }
+
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();        
+    }
 }

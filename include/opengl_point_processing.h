@@ -77,6 +77,8 @@ public:
 
 
     void draw_point_global(std::vector<PointCloud> & global_cloud, GLfloat size);
+    void draw_point_global_double_window_test(std::vector<PointCloud> & global_cloud, GLfloat size);
+
 
     void draw_axis(float line_length, float line_width, Shader* shader);
 

@@ -6,12 +6,11 @@
 class PointCloud{
 public:
 
-    bool rel_state_exist;
-    bool gt_state_exist;
 
     bool plane_uncertainty;
 
     std::vector<float> state;
+    std::vector<float> dr_state;
     std::vector<float> rel_state;
 
     PointCloud();
@@ -25,7 +24,7 @@ public:
     
 
     void input_rel_state(std::vector<float> & relative_state);
-    void input_gt_state(std::vector<float> & groundtruth_state);
+    void input_dr_state(std::vector<float> & dr_state_i);
     void change_state(std::vector<float> & changed_state);
 
     void estimate_plane_model();

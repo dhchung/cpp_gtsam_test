@@ -80,6 +80,7 @@ void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime) {
     if(direction == RIGHT) {
         Position += Right * velocity;
     }
+    
 }
 
 void Camera::ProcessInput(float dx, float dy, float dz,

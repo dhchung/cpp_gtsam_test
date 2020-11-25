@@ -41,6 +41,8 @@
 
 #include "absolute_factor.h"
 
+#include "Eigen/Dense"
+
 using namespace std;
 
 using namespace gtsam;
@@ -58,6 +60,8 @@ DrProcessing dr_processing;
 Tools tools;
 
 DetectLoop detect_loop;
+CalTransform c_trans;
+
 
 int main(int argc, char** argv){
 
@@ -113,13 +117,13 @@ int main(int argc, char** argv){
 
     int initial_data_no = 120;
     int final_data_no = data_num-6;
-    // final_data_no = 300;
+    // final_data_no = 130;
 
     Values inloop_result;
 
     for(int i = initial_data_no; i<final_data_no; ++i) {
 
-        std::cout<<"data : "<<i<<" out of "<<final_data_no<<std::endl;
+        // std::cout<<"data : "<<i<<" out of "<<final_data_no<<std::endl;
 
         std::vector<float> cur_dr_state = dr_processing.nav_data[i];
         std::vector<float> rel_dr_prev_state = dr_processing.rel_nav_data[i-1];
@@ -136,7 +140,7 @@ int main(int argc, char** argv){
         ransac_plane.perform_ransac_plane(pt_cld, &ransac_point_3d);
 
         ransac_point_3d.estimate_plane_model();
-        ransac_point_3d.input_gt_state(cur_dr_state);
+        ransac_point_3d.input_dr_state(cur_dr_state);
         ransac_point_3d.input_rel_state(rel_dr_prev_state);
 
 
@@ -183,31 +187,58 @@ int main(int argc, char** argv){
             measurement(2) = ransac_point_3d.plane_model(2);
             measurement(3) = ransac_point_3d.plane_model(3);
 
-            // detect_loop.find_loop_distance(cur_sp_state, inloop_result, &loop_candidates, &distance);
+            //prev measure:
 
-            // for(int loop_id:loop_candidates){
-            //     std::cout<<loop_id<<", ";
-            // }
-            // std::cout<<std::endl;
+            StatePlane prev_state = inloop_result.at<StatePlane>(inloop_result.size()-1);
+
+            Eigen::Matrix4f dT;
+            Eigen::Matrix4f Eye_4 = Eigen::Matrix4f::Identity(4,4);
+            c_trans.xyzrpy2t(rel_dr_prev_state, &dT);
+
+            Eigen::Vector4f prev_plane(prev_state.nx, prev_state.ny, prev_state.nz, prev_state.d);
+            Eigen::Vector4f curr_plane(measurement(0), measurement(1), measurement(2), measurement(3));
+
+            Eigen::Vector4f prev2curr_plane = c_trans.transform_plane(Eye_4, prev_plane, dT);
+
+            Eigen::Vector3f n1 = prev2curr_plane.segment(0,3);
+            Eigen::Vector3f n2 = curr_plane.segment(0,3);
+
+            // float theta = acos(n1.transpose()*n2/(sqrt(n1.transpose()*n1)*sqrt(n2.transpose()*n2)));
+            float n1_norm = n1.transpose()*n1;
+            float n2_norm = n2.transpose()*n2;
+
+            float theta = acos(n1.transpose()*n2);
+            if(abs(theta)>20*M_PI/180.0f){
+                std::cout<<"SHITTTTTTTTTTTTTTTTTTT"<<std::endl;
+                std::cout<<theta*180.0f/M_PI<<std::endl;
+                continue;
+            }
+
+            detect_loop.find_loop_distance(cur_sp_state, inloop_result, &loop_candidates, &distance);
+
+            for(int loop_id:loop_candidates){
+                std::cout<<loop_id<<", ";
+            }
+            std::cout<<std::endl;
 
 
-            // if(!loop_candidates.empty()){
-            //     for(int id = 0; id<loop_candidates.size(); ++id){
-            //         int candid_id = loop_candidates[id];
-            //         double dist = (double)distance[id];
+            if(!loop_candidates.empty()){
+                for(int id = 0; id<loop_candidates.size(); ++id){
+                    int candid_id = loop_candidates[id];
+                    double dist = (double)distance[id];
 
-            //         double meas_noise_n = measure_noise_normal + exp(dist/5)-1.0;
-            //         double meas_noise_d = measure_noise_normal + exp(dist)-1.0;
+                    double meas_noise_n = measure_noise_normal + exp(dist/5)-1.0;
+                    double meas_noise_d = measure_noise_normal + exp(dist)-1.0;
 
-            //         gtsam::noiseModel::Diagonal::shared_ptr measNoise_d = 
-            //             gtsam::noiseModel::Diagonal::Sigmas((gtsam::Vector(4)<<meas_noise_n,
-            //                                                                    meas_noise_n,
-            //                                                                    meas_noise_n,
-            //                                                                    meas_noise_d).finished());
+                    gtsam::noiseModel::Diagonal::shared_ptr measNoise_d = 
+                        gtsam::noiseModel::Diagonal::Sigmas((gtsam::Vector(4)<<meas_noise_n,
+                                                                               meas_noise_n,
+                                                                               meas_noise_n,
+                                                                               meas_noise_d).finished());
 
-            //         graph.add(boost::make_shared<PlanarFactor>(candid_id, gtsam_idx+1, measurement, measNoise_d));
-            //     }
-            // }
+                    graph.add(boost::make_shared<PlanarFactor>(candid_id, gtsam_idx+1, measurement, measNoise_d));
+                }
+            }
 
 
 
@@ -225,20 +256,20 @@ int main(int argc, char** argv){
 
             global_cloud.push_back(ransac_point_3d);
             
-            // inloop_result = LevenbergMarquardtOptimizer(graph, initials).optimize();
+            inloop_result = LevenbergMarquardtOptimizer(graph, initials).optimize();
 
-            // for(int j = 0; j < inloop_result.size(); ++j){
-            //     StatePlane optimized_result = inloop_result.at<StatePlane>(j);
-            //     std::vector<float> optimized_state;
-            //     optimized_state.push_back(optimized_result.x);
-            //     optimized_state.push_back(optimized_result.y);
-            //     optimized_state.push_back(optimized_result.z);
-            //     optimized_state.push_back(optimized_result.roll);
-            //     optimized_state.push_back(optimized_result.pitch);
-            //     optimized_state.push_back(optimized_result.yaw);
-            //     global_cloud[j].change_state(optimized_state);
+            for(int j = 0; j < inloop_result.size(); ++j){
+                StatePlane optimized_result = inloop_result.at<StatePlane>(j);
+                std::vector<float> optimized_state;
+                optimized_state.push_back(optimized_result.x);
+                optimized_state.push_back(optimized_result.y);
+                optimized_state.push_back(optimized_result.z);
+                optimized_state.push_back(optimized_result.roll);
+                optimized_state.push_back(optimized_result.pitch);
+                optimized_state.push_back(optimized_result.yaw);
+                global_cloud[j].change_state(optimized_state);
 
-            // }
+            }
 
 
 
@@ -271,8 +302,9 @@ int main(int argc, char** argv){
 
     // ogl_pt_processing.draw_plane_global(results);
     // ogl_pt_processing.draw_plane_global_wo_texture(results);
-    ogl_pt_processing.draw_surfels(results);
+    // ogl_pt_processing.draw_surfels(results);
     // ogl_pt_processing.draw_point_global(global_cloud, 3.0f);
+    ogl_pt_processing.draw_point_global_double_window_test(global_cloud, 3.0f);
     ogl_pt_processing.terminate();
     return 0;
 }
