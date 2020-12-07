@@ -188,6 +188,28 @@ Eigen::Vector4f CalTransform::transform_plane(Eigen::Matrix4f & T1, Eigen::Vecto
     return result;
 }
 
+Eigen::VectorXf CalTransform::transform_plane2surfel(Eigen::Matrix4f & T, Eigen::Vector4f & plane){
+
+    Eigen::Vector3f n1 = plane.segment(0,3);
+    Eigen::Vector4f d1_pt = Eigen::Vector4f::Zero(4);
+    d1_pt(0) = -plane(3)/plane(0);
+    d1_pt(3) = 1.0f;
+
+
+    Eigen::Matrix3f R1 = T.block(0,0,3,3);
+    Eigen::Vector3f t1 = T.block(0,3,3,1);
+
+    Eigen::Vector3f n2 = R1*n1;
+    Eigen::Vector4f c2_temp = T*d1_pt;
+    Eigen::Vector3f c2 = c2_temp.segment(0,3);
+
+    Eigen::VectorXf result(6);
+    result<<n2, c2;
+    return result;
+}
+
+
+
 Eigen::Vector3f CalTransform::transform_point(Eigen::Matrix4f &T, Eigen::Vector3f &pt){
     Eigen::Vector4f pt_1;
     pt_1<<pt, 1.0;
@@ -195,9 +217,18 @@ Eigen::Vector3f CalTransform::transform_point(Eigen::Matrix4f &T, Eigen::Vector3
     Eigen::Vector4f pt_2;
 
     pt_2 = T*pt_1;
-    result = pt_2.segment(0,2);
+    result = pt_2.segment(0,3);
     return result;
 }
+
+Eigen::Matrix3Xf CalTransform::transform_points(Eigen::Matrix4f &T, Eigen::Matrix3Xf &pts){
+    Eigen::Matrix4Xf pt_1 = Eigen::Matrix4Xf::Ones(4,pts.cols());
+    pt_1.block(0,0,3,pts.cols()) = pts;
+    Eigen::Matrix4Xf pt_2 = T*pt_1;
+    Eigen::Matrix3Xf result = pt_2.block(0,0,3,pts.cols());
+    return result;
+}
+
 
 void CalTransform::odometry_calculation(float & prev_x, float & prev_y, float & prev_z, float & prev_roll, float & prev_pitch, float & prev_yaw,
                                         float & cur_dx, float & cur_dy, float & cur_dz, float & cur_droll, float & cur_dpitch, float & cur_dyaw,

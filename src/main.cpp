@@ -62,6 +62,42 @@ Tools tools;
 DetectLoop detect_loop;
 CalTransform c_trans;
 
+void write_txt(std::string &filepath, std::vector<std::vector<float>> &surfels){
+    std::ofstream writeFile(filepath.data());
+    if(writeFile.is_open()){
+        for(int i = 0; i < surfels.size(); ++i){
+            writeFile << std::to_string(surfels[i][0]) << "\t";
+            writeFile << std::to_string(surfels[i][1]) << "\t";
+            writeFile << std::to_string(surfels[i][2]) << "\t";
+            writeFile << std::to_string(surfels[i][3]) << "\t";
+            writeFile << std::to_string(surfels[i][4]) << "\t";
+            writeFile << std::to_string(surfels[i][5]) << "\n";            
+        }
+        writeFile.close();
+    }
+}
+
+void write_txt(std::string &filepath, std::vector<std::vector<std::vector<float>>> &points){
+    std::ofstream writeFile(filepath.data());
+    if(writeFile.is_open()){
+        for(int i = 0; i < points.size(); ++i){
+            for(int j = 0; j<points[i].size(); ++j){
+                writeFile << std::to_string(points[i][j][0]) << "\t";
+                writeFile << std::to_string(points[i][j][1]) << "\t";
+                writeFile << std::to_string(points[i][j][2]) << "\t";
+                writeFile << std::to_string(points[i][j][3]) << "\t";
+                writeFile << std::to_string(points[i][j][4]) << "\t";
+                writeFile << std::to_string(points[i][j][5]) << "\t";
+                writeFile << std::to_string(points[i][j][6]) << "\t";
+                writeFile << std::to_string(points[i][j][7]) << "\t";
+                writeFile << std::to_string(points[i][j][8]) << "\n";            
+            }
+        }
+        writeFile.close();
+    }
+}
+
+
 
 int main(int argc, char** argv){
 
@@ -209,8 +245,6 @@ int main(int argc, char** argv){
 
             float theta = acos(n1.transpose()*n2);
             if(abs(theta)>20*M_PI/180.0f){
-                std::cout<<"SHITTTTTTTTTTTTTTTTTTT"<<std::endl;
-                std::cout<<theta*180.0f/M_PI<<std::endl;
                 continue;
             }
 
@@ -279,7 +313,7 @@ int main(int argc, char** argv){
 
         }
 
-        ogl_pt_processing.plot_global_points(global_cloud, ransac_point_3d.state, i);
+        // ogl_pt_processing.plot_global_points(global_cloud, ransac_point_3d.state, i);
     }
 
     gtsam::Values results = LevenbergMarquardtOptimizer(graph, initials).optimize();
@@ -304,8 +338,63 @@ int main(int argc, char** argv){
     // ogl_pt_processing.draw_plane_global_wo_texture(results);
     // ogl_pt_processing.draw_surfels(results);
     // ogl_pt_processing.draw_point_global(global_cloud, 3.0f);
-    ogl_pt_processing.draw_point_global_double_window_test(global_cloud, 3.0f);
+    // ogl_pt_processing.draw_point_global_double_window_test(global_cloud, 3.0f);
     ogl_pt_processing.terminate();
+
+
+    std::vector<std::vector<float>> surfel_write;
+    std::vector<std::vector<std::vector<float>>> point_cloud_write;
+
+    point_cloud_write.resize(results.size());
+    surfel_write.resize(results.size());
+    
+
+    for(int i=0; i<results.size(); ++i) {
+        surfel_write[i].resize(6);
+        point_cloud_write[i].resize(global_cloud[i].point_cloud.cols());
+        std::cout<<"pt_size: "<<(int)global_cloud[i].point_cloud.cols()<<std::endl;
+        StatePlane optimized_result = results.at<StatePlane>(i);
+        Eigen::Matrix4f T;
+        c_trans.xyzrpy2t(optimized_result.x,
+                         optimized_result.y,
+                         optimized_result.z,
+                         optimized_result.roll,
+                         optimized_result.pitch,
+                         optimized_result.yaw,
+                         &T);
+        
+        Eigen::Matrix3Xf pt_global = c_trans.transform_points(T, global_cloud[i].point_cloud);
+        Eigen::Vector4f surfel_local;
+        surfel_local<< optimized_result.nx, optimized_result.ny, optimized_result.nz, optimized_result.d;
+        Eigen::VectorXf surfel_global(6);
+        surfel_global = c_trans.transform_plane2surfel(T, surfel_local);
+        for(int si = 0; si < 6; ++si){
+            surfel_write[i][si] = surfel_global(si);
+        }
+        std::cout<<pt_global<<std::endl;
+
+        for(int pti=0; pti < global_cloud[i].point_cloud.cols(); ++pti){
+            std::cout<<"pt_idx: "<<pti<<std::endl;
+            std::cout<<"pt_glob: "<<pt_global(0,pti)<<std::endl;
+            point_cloud_write[i][pti].resize(9);
+            std::cout<<"vector size: "<<(int)point_cloud_write[i][pti].size()<<std::endl;
+            point_cloud_write[i][pti][0] = pt_global(0,pti);
+            point_cloud_write[i][pti][1] = pt_global(1,pti);
+            point_cloud_write[i][pti][2] = pt_global(2,pti);
+            point_cloud_write[i][pti][3] = surfel_global(0);
+            point_cloud_write[i][pti][4] = surfel_global(1);
+            point_cloud_write[i][pti][5] = surfel_global(2);
+            point_cloud_write[i][pti][6] = global_cloud[i].point_color(0,pti);
+            point_cloud_write[i][pti][7] = global_cloud[i].point_color(1,pti);
+            point_cloud_write[i][pti][8] = global_cloud[i].point_color(2,pti);
+        }
+    }
+
+    string surfel_txt = "Matlab/surfel.txt";
+    string points_txt = "Matlab/points.txt";
+    write_txt(surfel_txt, surfel_write);
+    write_txt(points_txt, point_cloud_write);
+
     return 0;
 }
 
