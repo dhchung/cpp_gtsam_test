@@ -153,7 +153,7 @@ int main(int argc, char** argv){
 
     int initial_data_no = 120;
     int final_data_no = data_num-6;
-    // final_data_no = 130;
+    // final_data_no = 200;
 
     Values inloop_result;
 
@@ -313,7 +313,7 @@ int main(int argc, char** argv){
 
         }
 
-        // ogl_pt_processing.plot_global_points(global_cloud, ransac_point_3d.state, i);
+        ogl_pt_processing.plot_global_points(global_cloud, ransac_point_3d.state, i);
     }
 
     gtsam::Values results = LevenbergMarquardtOptimizer(graph, initials).optimize();
@@ -338,7 +338,7 @@ int main(int argc, char** argv){
     // ogl_pt_processing.draw_plane_global_wo_texture(results);
     // ogl_pt_processing.draw_surfels(results);
     // ogl_pt_processing.draw_point_global(global_cloud, 3.0f);
-    // ogl_pt_processing.draw_point_global_double_window_test(global_cloud, 3.0f);
+    ogl_pt_processing.draw_point_global_double_window_test(global_cloud, 3.0f);
     ogl_pt_processing.terminate();
 
 
