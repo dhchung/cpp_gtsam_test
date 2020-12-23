@@ -153,7 +153,7 @@ int main(int argc, char** argv){
 
     int initial_data_no = 120;
     int final_data_no = data_num-6;
-    // final_data_no = 200;
+    final_data_no = 500;
 
     Values inloop_result;
 
@@ -263,6 +263,14 @@ int main(int argc, char** argv){
 
                     double meas_noise_n = measure_noise_normal + exp(dist/5)-1.0;
                     double meas_noise_d = measure_noise_normal + exp(dist)-1.0;
+
+                    std::cout<<meas_noise_n<<std::endl;
+                    std::cout<<meas_noise_d<<std::endl<<std::endl;
+
+
+                    // double meas_noise_n = measure_noise_normal;
+                    // double meas_noise_d = measure_noise_distance;
+
 
                     gtsam::noiseModel::Diagonal::shared_ptr measNoise_d = 
                         gtsam::noiseModel::Diagonal::Sigmas((gtsam::Vector(4)<<meas_noise_n,
