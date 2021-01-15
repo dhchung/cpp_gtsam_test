@@ -153,7 +153,7 @@ int main(int argc, char** argv){
 
     int initial_data_no = 120;
     int final_data_no = data_num-6;
-    final_data_no = 500;
+    // final_data_no = 500;
 
     Values inloop_result;
 
@@ -196,7 +196,7 @@ int main(int argc, char** argv){
 
             graph.add(gtsam::PriorFactor<gtsamexample::StatePlane>(gtsam_idx, init_sp_state, priorNoise));
             initials.insert(gtsam_idx, init_sp_state);
-            ogl_pt_processing.insertImages(img_proc.l_img);
+            // ogl_pt_processing.insertImages(img_proc.l_img);
             global_cloud.push_back(ransac_point_3d);
             inloop_result = LevenbergMarquardtOptimizer(graph, initials).optimize();
             
@@ -262,7 +262,7 @@ int main(int argc, char** argv){
                     double dist = (double)distance[id];
 
                     double meas_noise_n = measure_noise_normal + exp(dist/5)-1.0;
-                    double meas_noise_d = measure_noise_normal + exp(dist)-1.0;
+                    double meas_noise_d = measure_noise_distance + exp(dist)-1.0;
 
                     std::cout<<meas_noise_n<<std::endl;
                     std::cout<<meas_noise_d<<std::endl<<std::endl;
@@ -312,9 +312,6 @@ int main(int argc, char** argv){
                 global_cloud[j].change_state(optimized_state);
 
             }
-
-
-
 
             ++gtsam_idx;
             ogl_pt_processing.insertImages(img_proc.l_img);
