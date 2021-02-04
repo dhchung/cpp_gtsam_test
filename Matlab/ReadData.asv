@@ -12,22 +12,19 @@ for i = 1:size(poses,1)
 end
 
 figure(1);
-scatter3(pts(:,1), pts(:,2), pts(:,3), 5, pts(:,7:9)/255, 'filled'); hold on;
-h1 = plot3(locations(1,1),locations(2,1),locations(3,1),'b'); 
-h = DrawCam(526, 344, 472, T(:,:,1), 0.2, 'r', 1.5);
 for i=1:size(poses,1)
-    delete(h1);
-    delete(h);
-    h1 = plot3(locations(1,1:i),locations(2,1:i),locations(3,1:i),'b'); 
+    scatter3(pts(:,1), pts(:,2), pts(:,3), 5, pts(:,7:9)/255, 'filled'); hold on;
+    plot3(locations(1,1:i),locations(2,1:i),locations(3,1:i)); 
     h = DrawCam(526, 344, 472, T(:,:,i), 0.2, 'r', 1.5);
     axis equal;
-    set(gca,'YDir','reverse');
-    set(gca,'ZDir','reverse');
-    xlabel X[m];
-    ylabel Y[m];
-    zlabel Z[m];
     drawnow;
 end
+axis equal;
+set(gca,'YDir','reverse');
+set(gca,'ZDir','reverse');
+xlabel X[m];
+ylabel Y[m];
+zlabel Z[m];
 
 surfels = load('surfel.txt');
 figure(2);

@@ -62,16 +62,32 @@ Tools tools;
 DetectLoop detect_loop;
 CalTransform c_trans;
 
-void write_txt(std::string &filepath, std::vector<std::vector<float>> &surfels){
+
+void write_txt(std::string &filepath, std::vector<int> &data){
     std::ofstream writeFile(filepath.data());
     if(writeFile.is_open()){
-        for(int i = 0; i < surfels.size(); ++i){
-            writeFile << std::to_string(surfels[i][0]) << "\t";
-            writeFile << std::to_string(surfels[i][1]) << "\t";
-            writeFile << std::to_string(surfels[i][2]) << "\t";
-            writeFile << std::to_string(surfels[i][3]) << "\t";
-            writeFile << std::to_string(surfels[i][4]) << "\t";
-            writeFile << std::to_string(surfels[i][5]) << "\n";            
+        for(int i = 0; i < data.size(); ++i){
+            if(i == data.size()-1) {
+                writeFile << std::to_string(data[i]) << "\n";
+            } else {
+                writeFile << std::to_string(data[i]) << "\t";
+            }
+        }
+        writeFile.close();
+    }
+}
+
+void write_txt(std::string &filepath, std::vector<std::vector<float>> &data){
+    std::ofstream writeFile(filepath.data());
+    if(writeFile.is_open()){
+        for(int i = 0; i < data.size(); ++i){
+            for(int j=0; j<data[i].size(); ++j) {
+                if(j == data[i].size()-1) {
+                    writeFile << std::to_string(data[i][j]) << "\n";
+                } else {
+                    writeFile << std::to_string(data[i][j]) << "\t";
+                }
+            }
         }
         writeFile.close();
     }
@@ -153,7 +169,9 @@ int main(int argc, char** argv){
 
     int initial_data_no = 120;
     int final_data_no = data_num-6;
-    // final_data_no = 500;
+    // final_data_no = 150;
+
+    std::vector<int> image_idx;
 
     Values inloop_result;
 
@@ -199,6 +217,7 @@ int main(int argc, char** argv){
             // ogl_pt_processing.insertImages(img_proc.l_img);
             global_cloud.push_back(ransac_point_3d);
             inloop_result = LevenbergMarquardtOptimizer(graph, initials).optimize();
+            image_idx.push_back(i);
             
         }else{
 
@@ -247,6 +266,7 @@ int main(int argc, char** argv){
             if(abs(theta)>20*M_PI/180.0f){
                 continue;
             }
+            image_idx.push_back(i);
 
             detect_loop.find_loop_distance(cur_sp_state, inloop_result, &loop_candidates, &distance);
 
@@ -353,11 +373,14 @@ int main(int argc, char** argv){
     point_cloud_write.resize(results.size());
     surfel_write.resize(results.size());
     
+    std::vector<std::vector<float>> pose_write;
+    pose_write.resize(results.size());
 
     for(int i=0; i<results.size(); ++i) {
         surfel_write[i].resize(6);
         point_cloud_write[i].resize(global_cloud[i].point_cloud.cols());
-        std::cout<<"pt_size: "<<(int)global_cloud[i].point_cloud.cols()<<std::endl;
+        pose_write[i].resize(16);
+        // std::cout<<"pt_size: "<<(int)global_cloud[i].point_cloud.cols()<<std::endl;
         StatePlane optimized_result = results.at<StatePlane>(i);
         Eigen::Matrix4f T;
         c_trans.xyzrpy2t(optimized_result.x,
@@ -368,6 +391,14 @@ int main(int argc, char** argv){
                          optimized_result.yaw,
                          &T);
         
+        for(int j = 0; j < 4; ++j) {
+            for(int k = 0; k < 4; ++k){
+                pose_write[i][4*j+k] = T(k,j);
+            }
+        }
+
+
+
         Eigen::Matrix3Xf pt_global = c_trans.transform_points(T, global_cloud[i].point_cloud);
         Eigen::Vector4f surfel_local;
         surfel_local<< optimized_result.nx, optimized_result.ny, optimized_result.nz, optimized_result.d;
@@ -379,10 +410,10 @@ int main(int argc, char** argv){
         std::cout<<pt_global<<std::endl;
 
         for(int pti=0; pti < global_cloud[i].point_cloud.cols(); ++pti){
-            std::cout<<"pt_idx: "<<pti<<std::endl;
-            std::cout<<"pt_glob: "<<pt_global(0,pti)<<std::endl;
+            // std::cout<<"pt_idx: "<<pti<<std::endl;
+            // std::cout<<"pt_glob: "<<pt_global(0,pti)<<std::endl;
             point_cloud_write[i][pti].resize(9);
-            std::cout<<"vector size: "<<(int)point_cloud_write[i][pti].size()<<std::endl;
+            // std::cout<<"vector size: "<<(int)point_cloud_write[i][pti].size()<<std::endl;
             point_cloud_write[i][pti][0] = pt_global(0,pti);
             point_cloud_write[i][pti][1] = pt_global(1,pti);
             point_cloud_write[i][pti][2] = pt_global(2,pti);
@@ -399,6 +430,12 @@ int main(int argc, char** argv){
     string points_txt = "Matlab/points.txt";
     write_txt(surfel_txt, surfel_write);
     write_txt(points_txt, point_cloud_write);
+
+    string img_idx_txt = "Matlab/img_idx.txt";
+    write_txt(img_idx_txt, image_idx);
+
+    string pose_txt = "Matlab/pose.txt";
+    write_txt(pose_txt, pose_write);
 
     return 0;
 }
